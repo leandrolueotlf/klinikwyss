@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Klinik Wyss</title>
+    <link rel="stylesheet" href="/css/style.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="wrap">
+        <p class="eyebrow">Willkommen</p>
+        <h1>Klinik Wyss</h1>
+        <p class="lede">
+          Diese Seite läuft über Node.js. Inhalt und Bereiche können Sie hier
+          ergänzen.
+        </p>
+      </div>
+    </header>
+    <main class="wrap">
+      <section class="card">
+        <h2>Nächste Schritte</h2>
+        <ul>
+          <li>Texte und Kontaktdaten in <code>public/index.html</code> anpassen</li>
+          <li>Bilder nach <code>public/images/</code> legen</li>
+          <li>Bei Hostinger: Repo verbinden, Build <code>npm install</code>, Start <code>npm start</code></li>
+        </ul>
+      </section>
+    </main>
+    <footer class="site-footer">
+      <div class="wrap">
+        <small>&copy; <span id="y"></span> Klinik Wyss</small>
+      </div>
+    </footer>
+    <script>
+      document.getElementById("y").textContent = new Date().getFullYear();
+    </script>
+  </body>
+</html>
