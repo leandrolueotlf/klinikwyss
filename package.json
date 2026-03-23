@@ -5,7 +5,7 @@
   "description": "Website Klinik Wyss",
   "main": "server.js",
   "scripts": {
-    "build": "node -e \"require('fs').mkdirSync('data',{recursive:true}); console.log('build: ok (kein Bundler)');\"",
+    "build": "node build.js",
     "start": "node server.js",
     "dev": "node --watch server.js"
   },

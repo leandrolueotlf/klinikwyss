@@ -38,7 +38,14 @@ Die SQLite-Datei liegt unter `data/planungen.db` (nicht im Repo; Ordner `data/` 
 - **Root-Verzeichnis (Repository root):** Ordner mit `package.json` und `server.js` (oft `/` oder leer = Repo-Wurzel).
 - **Output Directory / Ausgabeordner / Publish directory:** **Leer lassen** bzw. nicht auf einen Ordner wie `dist` oder `build` setzen, **es sei denn**, ihr erzeugt dort wirklich Dateien. Dieses Projekt ist eine **Server-App ohne statischen Export-Ordner** — ein fiktiver oder falscher Output-Pfad kann Deploy oder Routing stören. In der Oberfläche oft als `null` oder leer angezeigt; das ist **in Ordnung**, solange kein nicht existierender Pfad eingetragen ist.
 
-Falls das Panel einen **Build-Befehl** erwartet, muss `npm run build` existieren — sonst schlägt der Deploy mit „Missing script: build“ fehl.
+Falls das Panel einen **Build-Befehl** erwartet, muss `npm run build` existieren — sonst schlägt der Deploy mit „Missing script: build“ fehl. Der Build legt nur `data/` an (`build.js` neben `package.json`, damit es auch funktioniert, wenn das Panel einen anderen **cwd** hat).
+
+### Build fehlgeschlagen (Hostinger Deployments)
+
+1. **Log öffnen:** oft ist es nicht `npm run build`, sondern **`npm install`** (z. B. `sqlite3` — natives Modul braucht passende Node-Version + Build-Tools auf dem Server). Im Log nach `npm ERR!` suchen.
+2. **Node-Version** im Panel auf **≥ 18** stellen (siehe `package.json` → `engines`).
+3. **Root-Verzeichnis:** muss der Ordner sein, in dem **`package.json`** und **`server.js`** liegen (nicht ein übergeordneter Ordner).
+4. **Output / Publish directory:** leer lassen (siehe oben), es sei denn, ihr baut wirklich nach `dist/`.
 
 `sqlite3` ist ein natives Modul; wenn **npm install** auf dem Server scheitert, mit dem Support klären, ob native Addons erlaubt sind.
 
