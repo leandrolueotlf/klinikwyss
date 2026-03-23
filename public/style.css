@@ -101,38 +101,59 @@ body {
   letter-spacing: -0.01em;
 }
 
-/* Berufsgruppen: Farbcodierung pro Zeile / Hover-Tooltip */
+/* Berufsgruppen: im Rich-Field gegen Tailwind/preflight (span erbt sonst body-Farbe) */
 .segment-preview {
   word-break: break-word;
 }
 
-.seg {
+.rich-field span.seg {
   display: inline;
   border-bottom: 2px solid transparent;
   cursor: help;
   transition: background-color 0.12s ease, border-color 0.12s ease;
+  border-radius: 0.125rem;
+  padding: 0 0.05em;
 }
 
-.seg:hover {
+.rich-field span.seg:hover {
   background-color: rgba(15, 23, 42, 0.06);
 }
 
-.seg-pflege {
-  color: #1d4ed8;
-  border-bottom-color: rgba(37, 99, 235, 0.45);
+/* !important: Tailwind CDN setzt oft color:inherit auf span */
+.rich-field span.seg-pflege {
+  color: #1d40af !important;
+  border-bottom-color: rgba(37, 99, 235, 0.5) !important;
+  background-color: rgba(37, 99, 235, 0.09) !important;
 }
 
-.seg-arzt {
-  color: #b91c1c;
-  border-bottom-color: rgba(220, 38, 38, 0.5);
+.rich-field span.seg-arzt {
+  color: #b91c1c !important;
+  border-bottom-color: rgba(220, 38, 38, 0.55) !important;
+  background-color: rgba(220, 38, 38, 0.08) !important;
 }
 
-.seg-psychologie {
-  color: #15803d;
-  border-bottom-color: rgba(22, 163, 74, 0.5);
+.rich-field span.seg-psychologie {
+  color: #15803d !important;
+  border-bottom-color: rgba(22, 163, 74, 0.55) !important;
+  background-color: rgba(22, 163, 74, 0.09) !important;
 }
 
-.seg-unknown {
-  color: #475569;
-  border-bottom-color: rgba(71, 85, 105, 0.45);
+.rich-field span.seg-unknown {
+  color: #475569 !important;
+  border-bottom-color: rgba(71, 85, 105, 0.45) !important;
+  background-color: rgba(71, 85, 105, 0.06) !important;
+}
+
+/* Gleiche Textfarben ausserhalb Rich-Field (Navigation, Tabellen, Badges) */
+.seg.seg-pflege {
+  color: #1d40af !important;
+}
+.seg.seg-arzt {
+  color: #b91c1c !important;
+}
+.seg.seg-psychologie {
+  color: #15803d !important;
+}
+.seg.seg-unknown {
+  color: #475569 !important;
 }
