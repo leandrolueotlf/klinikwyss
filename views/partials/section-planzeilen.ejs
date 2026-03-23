@@ -1,0 +1,94 @@
+<section class="form-section mb-8 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+  <div class="border-b border-slate-100 bg-slate-50 px-4 py-3">
+    <h2 class="text-sm font-semibold text-slate-800">Behandlungsplan — Ziele &amp; Maßnahmen</h2>
+    <p class="mt-1 text-xs text-slate-600">Individuelle Themen, Ziele, Maßnahmen, Frist, Evaluation</p>
+  </div>
+  <div class="overflow-x-auto">
+    <% if (!planungen || planungen.length === 0) { %>
+    <p class="px-4 py-8 text-center text-sm text-slate-500">Noch keine Einträge für diesen Fall.</p>
+    <% } else { %>
+    <table class="w-full min-w-[900px] text-left text-sm">
+      <thead>
+        <tr class="border-b border-slate-200 bg-white text-xs uppercase tracking-wide text-slate-500">
+          <th class="px-3 py-2 font-medium">Datum</th>
+          <th class="px-3 py-2 font-medium">Thema</th>
+          <th class="px-3 py-2 font-medium">Ziele / Bedürfnisse</th>
+          <th class="px-3 py-2 font-medium">Maßnahme</th>
+          <th class="px-3 py-2 font-medium">Bis wann</th>
+          <th class="px-3 py-2 font-medium">Evaluation</th>
+          <th class="px-3 py-2 font-medium">Ersteller</th>
+          <th class="px-3 py-2 font-medium">Status</th>
+          <th class="px-3 py-2 font-medium">Aktionen</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-100">
+        <% planungen.forEach(function (row) { %>
+        <tr class="align-top hover:bg-slate-50/80">
+          <td class="whitespace-nowrap px-3 py-3 text-slate-600"><%= formatDatum(row.datum) %></td>
+          <td class="px-3 py-3 text-slate-800"><%= row.thema || '—' %></td>
+          <td class="px-3 py-3 text-slate-800"><%= row.ziel %></td>
+          <td class="px-3 py-3 text-slate-700"><%= row.massnahme %></td>
+          <td class="whitespace-nowrap px-3 py-3 text-slate-600"><%= row.bis_wann || '—' %></td>
+          <td class="px-3 py-3 text-slate-600"><%= row.evaluation || '—' %></td>
+          <td class="whitespace-nowrap px-3 py-3 text-slate-600"><%= row.ersteller %></td>
+          <td class="px-3 py-3">
+            <span class="status-badge status-<%= statusClass(row.status) %>"><%= row.status %></span>
+          </td>
+          <td class="px-3 py-3">
+            <div class="flex flex-col gap-2">
+              <form method="post" action="/plan/status" class="flex flex-wrap items-center gap-1">
+                <input type="hidden" name="fallnr" value="<%= fallnr %>" />
+                <input type="hidden" name="user" value="<%= userRaw %>" />
+                <input type="hidden" name="id" value="<%= row.id %>" />
+                <select name="status" class="max-w-[10rem] rounded border border-slate-300 bg-white px-1 py-1 text-xs">
+                  <% statusOptions.forEach(function (s) { %>
+                  <option value="<%= s %>" <%= row.status === s ? 'selected' : '' %>><%= s %></option>
+                  <% }); %>
+                </select>
+                <button type="submit" class="rounded bg-klinik-blue px-2 py-1 text-xs font-medium text-white hover:bg-blue-900">OK</button>
+              </form>
+              <form method="post" action="/plan/delete" onsubmit="return confirm('Eintrag wirklich löschen?');">
+                <input type="hidden" name="fallnr" value="<%= fallnr %>" />
+                <input type="hidden" name="user" value="<%= userRaw %>" />
+                <input type="hidden" name="id" value="<%= row.id %>" />
+                <button type="submit" class="rounded border border-red-200 bg-white px-2 py-1 text-xs font-medium text-red-700 hover:bg-red-50">Löschen</button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        <% }); %>
+      </tbody>
+    </table>
+    <% } %>
+  </div>
+  <div class="border-t border-slate-100 p-4 sm:p-6">
+    <h3 class="mb-4 text-sm font-semibold text-slate-800">Neuen Plan-Eintrag erfassen</h3>
+    <form method="post" action="/plan" class="space-y-4">
+      <input type="hidden" name="fallnr" value="<%= fallnr %>" />
+      <input type="hidden" name="user" value="<%= userRaw %>" />
+      <div>
+        <label class="mb-1 block text-xs font-medium text-slate-600" for="thema">Individuelles Thema</label>
+        <input id="thema" name="thema" type="text" class="field-input" placeholder="optional" />
+      </div>
+      <div>
+        <label class="mb-1 block text-xs font-medium text-slate-600" for="ziel">Ziele und/oder Bedürfnisse</label>
+        <textarea id="ziel" name="ziel" required rows="2" class="field-textarea" placeholder="Pflichtfeld"></textarea>
+      </div>
+      <div>
+        <label class="mb-1 block text-xs font-medium text-slate-600" for="massnahme">Maßnahme (Wer macht was)</label>
+        <textarea id="massnahme" name="massnahme" required rows="2" class="field-textarea" placeholder="Pflichtfeld"></textarea>
+      </div>
+      <div class="grid gap-4 sm:grid-cols-2">
+        <div>
+          <label class="mb-1 block text-xs font-medium text-slate-600" for="bis_wann">Bis wann</label>
+          <input id="bis_wann" name="bis_wann" type="text" class="field-input" placeholder="Datum oder Frist" />
+        </div>
+        <div>
+          <label class="mb-1 block text-xs font-medium text-slate-600" for="evaluation">Evaluation</label>
+          <input id="evaluation" name="evaluation" type="text" class="field-input" placeholder="optional" />
+        </div>
+      </div>
+      <button type="submit" class="rounded-lg bg-klinik-blue px-4 py-2.5 text-sm font-semibold text-white shadow hover:bg-blue-900">Eintrag hinzufügen</button>
+    </form>
+  </div>
+</section>

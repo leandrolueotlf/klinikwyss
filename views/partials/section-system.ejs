@@ -1,0 +1,67 @@
+<section class="form-section mb-8 rounded-xl border border-slate-200 bg-white shadow-sm">
+  <div class="border-b border-slate-100 bg-slate-50 px-4 py-3">
+    <h2 class="text-base font-semibold text-klinik-blue">Systemgespräche</h2>
+    <p class="mt-1 text-xs text-slate-600">Angehörige, Arbeitgeber, Behörden, ambulantes Netz …</p>
+  </div>
+  <div class="overflow-x-auto px-2 py-4">
+    <% if (!systemgespraeche || systemgespraeche.length === 0) { %>
+    <p class="px-2 py-4 text-center text-sm text-slate-500">Noch keine Systemgespräche erfasst.</p>
+    <% } else { %>
+    <table class="w-full min-w-[640px] text-left text-sm">
+      <thead>
+        <tr class="border-b border-slate-200 text-xs uppercase text-slate-500">
+          <th class="px-3 py-2 font-medium">Ziele / Thema</th>
+          <th class="px-3 py-2 font-medium">Wann</th>
+          <th class="px-3 py-2 font-medium">Beteiligte</th>
+          <th class="px-3 py-2 font-medium">Zusammenfassung</th>
+          <th class="px-3 py-2 font-medium"></th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-100">
+        <% systemgespraeche.forEach(function (sg) { %>
+        <tr class="align-top">
+          <td class="px-3 py-3"><%= sg.ziele_thema || '—' %></td>
+          <td class="whitespace-nowrap px-3 py-3 text-slate-600"><%= sg.wann || '—' %></td>
+          <td class="px-3 py-3 text-slate-700"><%= sg.beteiligte || '—' %></td>
+          <td class="px-3 py-3 text-slate-600"><%= sg.zusammenfassung || '—' %></td>
+          <td class="px-3 py-3">
+            <form method="post" action="/plan/system/delete" onsubmit="return confirm('Dieses Systemgespräch löschen?');">
+              <input type="hidden" name="fallnr" value="<%= fallnr %>" />
+              <input type="hidden" name="user" value="<%= userRaw %>" />
+              <input type="hidden" name="id" value="<%= sg.id %>" />
+              <button type="submit" class="text-xs font-medium text-red-700 hover:underline">Löschen</button>
+            </form>
+          </td>
+        </tr>
+        <% }); %>
+      </tbody>
+    </table>
+    <% } %>
+  </div>
+  <div class="border-t border-slate-100 p-4 sm:p-6">
+    <h3 class="mb-4 text-sm font-semibold text-slate-800">Systemgespräch hinzufügen</h3>
+    <form method="post" action="/plan/system" class="space-y-3">
+      <input type="hidden" name="fallnr" value="<%= fallnr %>" />
+      <input type="hidden" name="user" value="<%= userRaw %>" />
+      <div>
+        <label class="mb-1 block text-xs font-medium text-slate-600" for="ziele_thema">Ziele und Thema</label>
+        <input id="ziele_thema" name="ziele_thema" type="text" class="field-input" />
+      </div>
+      <div class="grid gap-3 sm:grid-cols-2">
+        <div>
+          <label class="mb-1 block text-xs font-medium text-slate-600" for="wann">Wann</label>
+          <input id="wann" name="wann" type="text" class="field-input" />
+        </div>
+        <div>
+          <label class="mb-1 block text-xs font-medium text-slate-600" for="beteiligte">Beteiligte</label>
+          <input id="beteiligte" name="beteiligte" type="text" class="field-input" />
+        </div>
+      </div>
+      <div>
+        <label class="mb-1 block text-xs font-medium text-slate-600" for="zusammenfassung">Zusammenfassung</label>
+        <textarea id="zusammenfassung" name="zusammenfassung" rows="3" class="field-textarea"></textarea>
+      </div>
+      <button type="submit" class="rounded-lg bg-klinik-blue px-4 py-2 text-sm font-semibold text-white hover:bg-blue-900">Systemgespräch speichern</button>
+    </form>
+  </div>
+</section>

@@ -1,6 +1,16 @@
-# Klinik Wyss — Website (Node.js)
+# Klinik Wyss — Node.js / Express
 
-Express liefert statische Dateien aus `public/`. Für **Hostinger** (Node.js + GitHub):
+Express-App mit **Digitale Behandlungsplanung** (SQLite, EJS, Tailwind per CDN).
+
+## INES-Modul
+
+Aufruf mit Query-Parametern:
+
+`/plan?fallnr=<Fallnummer>&user=<Kürzel>`
+
+Beispiel: `/plan?fallnr=123&user=m.jungi`
+
+Ohne `fallnr`: Hinweis „Kein Patient ausgewählt“.
 
 ## Lokales Testen
 
@@ -9,23 +19,34 @@ npm install
 npm start
 ```
 
-Standard: <http://localhost:3000> — Health-Check: <http://localhost:3000/api/health>
+- Startseite: <http://localhost:3000>
+- Planung (Demo): <http://localhost:3000/plan?fallnr=DEMO&user=demo>
+- Health: <http://localhost:3000/api/health>
+
+Die SQLite-Datei liegt unter `data/planungen.db` (nicht im Repo; Ordner `data/` ist versioniert mit `.gitkeep`). Optional: `DB_PATH=/pfad/zur/db` setzen.
+
+## Hostinger (GitHub)
+
+- **Install:** `npm install`
+- **Start:** `npm start`
+- **Node:** ≥ 18
+
+`sqlite3` ist ein natives Modul; auf dem Hostinger-Node-Stack sollte die Installation über `npm install` funktionieren. Falls der Build fehlschlägt, mit dem Support klären, ob native Addons erlaubt sind.
 
 ## Projektstruktur
 
-| Pfad | Zweck |
-|------|--------|
-| `server.js` | Express-Server, `PORT` aus Umgebung |
-| `public/` | Öffentliche Website (HTML, CSS, Bilder) |
-| `public/index.html` | Startseite |
-| `public/css/` | Stylesheets |
-| `public/images/` | Bilder |
+| Datei / Ordner | Inhalt |
+|----------------|--------|
+| `server.js` | Express, Middleware (`fallnr`), Routen inkl. `POST /plan/fallakte`, `POST /plan/system` |
+| `database.js` | SQLite: `fallakten` (Beurteilung, Interprof, Austritt), `planungen` (Ziele/Maßnahmen), `systemgespraeche` |
+| `views/index.ejs` | Hauptseite; `views/partials/` Formularabschnitte |
+| `public/style.css` | Status-Badges, Formularfelder |
+| `data/` | `planungen.db` (lokal, nicht im Repo) |
 
-## Hostinger (GitHub-Deploy)
+### Formularbereiche (eine Seite `/plan`)
 
-1. Repository mit diesem Inhalt verbinden (Root = Repo-Wurzel, wo `package.json` liegt).
-2. **Install-Befehl:** `npm install` (oder `npm ci`, wenn `package-lock.json` committed ist).
-3. **Start-Befehl:** `npm start` — Hostinger setzt `PORT` automatisch; `server.js` liest `process.env.PORT`.
-4. Node-Version: mindestens **18** (siehe `package.json` → `engines`).
-
-Falls im Panel ein eigener Build-Schritt nötig ist und kein Build vorhanden ist: Build leer lassen oder nur `npm install` nutzen — es gibt kein separates `npm run build`.
+1. **Beurteilung & Kontext** — psychische Situation, Arbeit, Finanzen, Ziele, Wohnen, Soziales, Erfahrung stationär/ambulant  
+2. **Interprofessionelle Planung** — Situationstext, Priorisierungstabelle (1–10), qualitative Fragen  
+3. **Behandlungsplan** — tabellarische Zeilen mit Thema, Ziel, Maßnahme, Frist, Evaluation, Status  
+4. **Systemgespräche** — eigene Tabelle + Erfassung  
+5. **Austrittsplanung** — Angehörige, externe Stellen, Nachsorge, Notfallplan, amb. Themen, Spitex

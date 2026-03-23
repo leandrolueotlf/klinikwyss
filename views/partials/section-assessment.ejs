@@ -1,0 +1,99 @@
+<section class="form-section mb-8 rounded-xl border border-slate-200 bg-white shadow-sm">
+  <div class="border-b border-slate-100 bg-slate-50 px-4 py-3">
+    <h2 class="text-base font-semibold text-klinik-blue">Beurteilung &amp; Kontext</h2>
+    <p class="mt-1 text-xs text-slate-600">Aktuelle Situation, Arbeit, Finanzen, Ziele, Wohnen, Soziales, Erfahrung</p>
+  </div>
+  <form method="post" action="/plan/fallakte" class="p-4 sm:p-5">
+    <input type="hidden" name="fallnr" value="<%= fallnr %>" />
+    <input type="hidden" name="user" value="<%= userRaw %>" />
+    <input type="hidden" name="section" value="assessment" />
+    <div class="grid gap-8 md:grid-cols-2">
+      <div class="space-y-4">
+        <h3 class="text-sm font-semibold text-klinik-blue">Aktuelle psychische Situation</h3>
+        <% const psy = [
+          ['psy_eintritt', 'Was hat zum Klinikeintritt geführt?'],
+          ['psy_symptome', 'Symptome'],
+          ['psy_somatik', 'Somatik (pflegerelevant)'],
+          ['psy_noxen', 'Noxen'],
+          ['psy_bewaeltigung', 'Vorhandene Bewältigungsstrategien'],
+          ['psy_bedeutung', 'Dinge, die für mich Bedeutung haben'],
+          ['psy_risiko', 'Suizidalität, selbstschädigendes Verhalten, Fremdgefährdung, Entweichungsrisiko'],
+          ['psy_besonderheiten', 'Besonderheiten (Haustierbetreuung, Kinderbetreuung während PKW usw.)'],
+        ]; %>
+        <% psy.forEach(function ([name, label]) { %>
+        <div>
+          <label class="mb-1 block text-xs font-medium text-slate-600" for="<%= name %>"><%= label %></label>
+          <textarea id="<%= name %>" name="<%= name %>" rows="2" class="field-textarea"><%= akten[name] || '' %></textarea>
+        </div>
+        <% }); %>
+        <h3 class="pt-4 text-sm font-semibold text-klinik-blue">Arbeitssituation</h3>
+        <div>
+          <label class="mb-1 block text-xs font-medium text-slate-600" for="arbeit_beruf">Angaben zum beruflichen Alltag</label>
+          <textarea id="arbeit_beruf" name="arbeit_beruf" rows="2" class="field-textarea"><%= akten.arbeit_beruf || '' %></textarea>
+        </div>
+        <div>
+          <label class="mb-1 block text-xs font-medium text-slate-600" for="arbeit_grad">Beschäftigungsgrad und Arbeitgeber</label>
+          <textarea id="arbeit_grad" name="arbeit_grad" rows="2" class="field-textarea"><%= akten.arbeit_grad || '' %></textarea>
+        </div>
+        <h3 class="pt-4 text-sm font-semibold text-klinik-blue">Finanzielle Situation</h3>
+        <div>
+          <label class="mb-1 block text-xs font-medium text-slate-600" for="finanz_situation">Aktuelle finanzielle Situation</label>
+          <textarea id="finanz_situation" name="finanz_situation" rows="2" class="field-textarea"><%= akten.finanz_situation || '' %></textarea>
+        </div>
+        <div>
+          <label class="mb-1 block text-xs font-medium text-slate-600" for="finanz_schulden">Schulden und Schuldenberatung</label>
+          <textarea id="finanz_schulden" name="finanz_schulden" rows="2" class="field-textarea"><%= akten.finanz_schulden || '' %></textarea>
+        </div>
+        <div>
+          <label class="mb-1 block text-xs font-medium text-slate-600" for="finanz_sozialhilfe">Sozialhilfe, Ergänzungsleistungen usw.</label>
+          <textarea id="finanz_sozialhilfe" name="finanz_sozialhilfe" rows="2" class="field-textarea"><%= akten.finanz_sozialhilfe || '' %></textarea>
+        </div>
+      </div>
+      <div class="space-y-4">
+        <h3 class="text-sm font-semibold text-klinik-blue">Ziele</h3>
+        <div>
+          <label class="mb-1 block text-xs font-medium text-slate-600" for="ziele_wuenschen">Was wünschen Sie sich?</label>
+          <textarea id="ziele_wuenschen" name="ziele_wuenschen" rows="2" class="field-textarea"><%= akten.ziele_wuenschen || '' %></textarea>
+        </div>
+        <div>
+          <label class="mb-1 block text-xs font-medium text-slate-600" for="ziele_aenderung">Was soll sich ändern?</label>
+          <textarea id="ziele_aenderung" name="ziele_aenderung" rows="2" class="field-textarea"><%= akten.ziele_aenderung || '' %></textarea>
+        </div>
+        <h3 class="pt-4 text-sm font-semibold text-klinik-blue">Wohnsituation</h3>
+        <div>
+          <label class="mb-1 block text-xs font-medium text-slate-600" for="wohn_situation">Aktuelle Wohnsituation</label>
+          <textarea id="wohn_situation" name="wohn_situation" rows="2" class="field-textarea"><%= akten.wohn_situation || '' %></textarea>
+        </div>
+        <h3 class="pt-4 text-sm font-semibold text-klinik-blue">Soziale Situation</h3>
+        <div>
+          <label class="mb-1 block text-xs font-medium text-slate-600" for="sozial_situation">Partnerschaft, Kinder inkl. Alter</label>
+          <textarea id="sozial_situation" name="sozial_situation" rows="2" class="field-textarea"><%= akten.sozial_situation || '' %></textarea>
+        </div>
+        <div>
+          <label class="mb-1 block text-xs font-medium text-slate-600" for="sozial_bezug">Wichtige Bezugspersonen</label>
+          <textarea id="sozial_bezug" name="sozial_bezug" rows="2" class="field-textarea"><%= akten.sozial_bezug || '' %></textarea>
+        </div>
+        <div>
+          <label class="mb-1 block text-xs font-medium text-slate-600" for="sozial_stellen">Involvierte Stellen (KESB, IV, Sozialdienst, …)</label>
+          <textarea id="sozial_stellen" name="sozial_stellen" rows="2" class="field-textarea"><%= akten.sozial_stellen || '' %></textarea>
+        </div>
+        <h3 class="pt-4 text-sm font-semibold text-klinik-blue">Erfahrung stationär und ambulant</h3>
+        <div>
+          <label class="mb-1 block text-xs font-medium text-slate-600" for="erf_stationaer">Stationäre / teilstationäre Aufenthalte</label>
+          <textarea id="erf_stationaer" name="erf_stationaer" rows="2" class="field-textarea"><%= akten.erf_stationaer || '' %></textarea>
+        </div>
+        <div>
+          <label class="mb-1 block text-xs font-medium text-slate-600" for="erf_ambulant">Ambulante Behandlungen</label>
+          <textarea id="erf_ambulant" name="erf_ambulant" rows="2" class="field-textarea"><%= akten.erf_ambulant || '' %></textarea>
+        </div>
+        <div>
+          <label class="mb-1 block text-xs font-medium text-slate-600" for="erf_netz">Ambulantes Netz (Kontaktdaten)</label>
+          <textarea id="erf_netz" name="erf_netz" rows="3" class="field-textarea"><%= akten.erf_netz || '' %></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="mt-6 flex justify-end border-t border-slate-100 pt-4">
+      <button type="submit" class="rounded-lg bg-klinik-blue px-5 py-2 text-sm font-semibold text-white shadow hover:bg-blue-900">Beurteilung speichern</button>
+    </div>
+  </form>
+</section>
