@@ -35,6 +35,8 @@ Die SQLite-Datei liegt unter `data/planungen.db` (nicht im Repo; Ordner `data/` 
 - **Build:** `npm run build` (legt `data/` an; kein Frontend-Bundle)
 - **Start:** `npm start`
 - **Node:** ≥ 18
+- **Root-Verzeichnis (Repository root):** Ordner mit `package.json` und `server.js` (oft `/` oder leer = Repo-Wurzel).
+- **Output Directory / Ausgabeordner / Publish directory:** **Leer lassen** bzw. nicht auf einen Ordner wie `dist` oder `build` setzen, **es sei denn**, ihr erzeugt dort wirklich Dateien. Dieses Projekt ist eine **Server-App ohne statischen Export-Ordner** — ein fiktiver oder falscher Output-Pfad kann Deploy oder Routing stören. In der Oberfläche oft als `null` oder leer angezeigt; das ist **in Ordnung**, solange kein nicht existierender Pfad eingetragen ist.
 
 Falls das Panel einen **Build-Befehl** erwartet, muss `npm run build` existieren — sonst schlägt der Deploy mit „Missing script: build“ fehl.
 
