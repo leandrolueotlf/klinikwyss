@@ -175,11 +175,25 @@ function emptyPrioRow() {
 }
 
 async function init() {
-  ensureDataDir();
+  console.log(
+    "[db] cwd=%s __dirname=%s dataDir=%s dbPath=%s",
+    process.cwd(),
+    __dirname,
+    dataDir,
+    dbPath
+  );
+  try {
+    ensureDataDir();
+  } catch (e) {
+    console.error("[db] data-Verzeichnis nicht anlegbar:", e.message);
+    throw e;
+  }
   await new Promise((resolve, reject) => {
     db = new sqlite3.Database(dbPath, (err) => {
-      if (err) reject(err);
-      else resolve();
+      if (err) {
+        console.error("[db] SQLite öffnen fehlgeschlagen:", err.message);
+        reject(err);
+      } else resolve();
     });
   });
 

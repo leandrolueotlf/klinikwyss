@@ -300,6 +300,13 @@ app.use(BASE || "/", express.static(publicDir));
 app.use(BASE || "/", router);
 
 async function main() {
+  console.log(
+    "[boot] PORT=%s BASE_PATH(raw)=%s BASE=%s NODE=%s",
+    process.env.PORT || "(unset)",
+    process.env.BASE_PATH === undefined ? "(unset)" : JSON.stringify(process.env.BASE_PATH),
+    BASE || "/",
+    process.version
+  );
   await db.init();
   const host = process.env.HOST || "0.0.0.0";
   app.listen(port, host, () => {
