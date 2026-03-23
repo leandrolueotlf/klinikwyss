@@ -31,6 +31,11 @@ Die SQLite-Datei liegt unter `data/planungen.db` (nicht im Repo; Ordner `data/` 
 
 ## Hostinger (GitHub)
 
+Im Node.js-Bereich des Panels (Deploy / App-Konfiguration):
+
+- **Entry File / Einstiegsdatei / Hauptdatei:** `server.js` — **genau diese Datei** angeben. Steht dort etwas anderes oder ist das Feld leer, startet die App oft nicht korrekt, obwohl Build-Logs leer wirken.
+- **Start command** (falls abgefragt): `npm start` (entspricht `node server.js` laut `package.json`).
+
 - **Install:** `npm install`
 - **Build:** `npm run build` (legt `data/` an; kein Frontend-Bundle)
 - **Start:** `npm start`
