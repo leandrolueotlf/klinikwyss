@@ -210,8 +210,6 @@ async function init() {
     )
   `);
 
-  await migrate();
-
   await run(`
     CREATE TABLE IF NOT EXISTS fallakten (
       fallnr TEXT PRIMARY KEY,
@@ -273,6 +271,8 @@ async function init() {
       ersteller TEXT DEFAULT ''
     )
   `);
+
+  await migrate();
 }
 
 async function getFallakte(fallnr) {
