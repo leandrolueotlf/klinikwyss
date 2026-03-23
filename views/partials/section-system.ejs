@@ -1,3 +1,4 @@
+<% var redirectPage = typeof redirectPage !== 'undefined' ? redirectPage : 'system'; %>
 <section id="sec-system" class="form-section scroll-mt-24 rounded-xl border border-slate-200 bg-white shadow-sm">
   <div class="flex flex-col gap-2 border-b border-slate-100 bg-slate-50 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
     <div>
@@ -28,16 +29,18 @@
       </thead>
       <tbody class="divide-y divide-slate-100">
         <% systemgespraeche.forEach(function (sg) { %>
+        <% var sgRole = sg.ersteller_role || 'unknown'; %>
         <tr class="align-top">
           <td class="px-3 py-3"><%= sg.ziele_thema || '—' %></td>
           <td class="whitespace-nowrap px-3 py-3 text-slate-600"><%= sg.wann || '—' %></td>
           <td class="px-3 py-3 text-slate-700"><%= sg.beteiligte || '—' %></td>
           <td class="px-3 py-3 text-slate-600"><%= sg.zusammenfassung || '—' %></td>
-          <td class="whitespace-nowrap px-3 py-3 text-xs font-medium text-slate-800"><%= sg.ersteller || '—' %></td>
+          <td class="whitespace-nowrap px-3 py-3 text-xs font-medium">
+            <span class="seg seg-<%= sgRole %> inline-block rounded px-1.5 py-0.5" title="<%= roleLabels[sgRole] || sgRole %>"><%= sg.ersteller || '—' %></span>
+          </td>
           <td class="px-3 py-3">
             <form method="post" action="<%= basePath %>/plan/system/delete" onsubmit="return confirm('Dieses Systemgespräch löschen?');">
-              <input type="hidden" name="fallnr" value="<%= fallnr %>" />
-              <input type="hidden" name="user" value="<%= userRaw %>" />
+              <%- include('form-plan-context') %>
               <input type="hidden" name="id" value="<%= sg.id %>" />
               <button type="submit" class="text-xs font-medium text-red-700 hover:underline">Löschen</button>
             </form>
@@ -51,11 +54,10 @@
   <div id="system-new-form" class="scroll-mt-24 border-t border-slate-100 p-4 sm:p-6">
     <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
       <h3 class="text-sm font-semibold text-slate-800">Systemgespräch hinzufügen</h3>
-      <span class="text-xs text-slate-500">Gespeichert als: <strong><%= userLabel %></strong></span>
+      <span class="text-xs text-slate-500">Gespeichert als: <strong class="seg seg-<%= role %>"><%= userLabel %></strong> · <strong><%= roleLabel %></strong></span>
     </div>
     <form method="post" action="<%= basePath %>/plan/system" class="space-y-3">
-      <input type="hidden" name="fallnr" value="<%= fallnr %>" />
-      <input type="hidden" name="user" value="<%= userRaw %>" />
+      <%- include('form-plan-context') %>
       <div>
         <label class="mb-1 block text-xs font-medium text-slate-600" for="ziele_thema">Ziele und Thema</label>
         <input id="ziele_thema" name="ziele_thema" type="text" class="field-input" />

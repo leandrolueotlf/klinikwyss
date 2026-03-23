@@ -1,17 +1,22 @@
+<% var redirectPage = typeof redirectPage !== 'undefined' ? redirectPage : 'interprof'; %>
 <section id="sec-interprof" class="form-section scroll-mt-24 rounded-xl border border-slate-200 bg-white shadow-sm">
   <div class="border-b border-slate-100 bg-slate-50 px-4 py-3">
     <h2 class="text-base font-semibold text-klinik-blue">Interprofessionelle Behandlungsplanung</h2>
     <% if (typeof sectionAudit !== 'undefined' && sectionAudit && sectionAudit.interprof) { %>
-    <p class="mt-2 text-xs text-slate-500">Zuletzt gespeichert: <strong class="text-slate-700"><%= sectionAudit.interprof.by %></strong> · <%= formatDatum(sectionAudit.interprof.at) %></p>
+    <p class="mt-2 text-xs text-slate-500">
+      Zuletzt gespeichert: <strong class="text-slate-700"><%= sectionAudit.interprof.by %></strong>
+      <% if (sectionAudit.interprof.role) { %>
+      <span class="seg seg-<%= sectionAudit.interprof.role %> ml-1 inline-block rounded px-1.5 py-0.5 text-[11px] font-semibold"><%= roleLabels[sectionAudit.interprof.role] || sectionAudit.interprof.role %></span>
+      <% } %>
+      · <%= formatDatum(sectionAudit.interprof.at) %>
+    </p>
     <% } %>
   </div>
   <form id="form-interprof" method="post" action="<%= basePath %>/plan/fallakte" class="p-4 sm:p-5">
-    <input type="hidden" name="fallnr" value="<%= fallnr %>" />
-    <input type="hidden" name="user" value="<%= userRaw %>" />
+    <%- include('form-plan-context') %>
     <input type="hidden" name="section" value="interprof" />
     <div class="mb-6">
-      <label class="mb-1 block text-xs font-medium text-slate-600" for="ip_situation_zusammenfassung">Zusammenfassung und Paraphrase der aktuellen Situation</label>
-      <textarea id="ip_situation_zusammenfassung" name="ip_situation_zusammenfassung" rows="4" class="field-textarea"><%= akten.ip_situation_zusammenfassung || '' %></textarea>
+      <%- include('field-textarea-segmented', { name: 'ip_situation_zusammenfassung', label: 'Zusammenfassung und Paraphrase der aktuellen Situation', rows: 4 }) %>
     </div>
     <div class="mb-2 flex flex-wrap items-center justify-between gap-2">
       <p class="text-xs font-medium text-slate-700">Priorisierung (Not / Leidensdruck)</p>
@@ -57,22 +62,10 @@
       </table>
     </div>
     <div class="space-y-4">
-      <div>
-        <label class="mb-1 block text-xs font-medium text-slate-600" for="ip_gemeinsam_verstaendnis">Gemeinsames Verständnis und Beurteilung der Probleme und Bedürfnisse</label>
-        <textarea id="ip_gemeinsam_verstaendnis" name="ip_gemeinsam_verstaendnis" rows="3" class="field-textarea"><%= akten.ip_gemeinsam_verstaendnis || '' %></textarea>
-      </div>
-      <div>
-        <label class="mb-1 block text-xs font-medium text-slate-600" for="ip_ressourcen">Ressourcen — was hat früher und bisher geholfen?</label>
-        <textarea id="ip_ressourcen" name="ip_ressourcen" rows="3" class="field-textarea"><%= akten.ip_ressourcen || '' %></textarea>
-      </div>
-      <div>
-        <label class="mb-1 block text-xs font-medium text-slate-600" for="ip_bedarf">Was brauchen Sie jetzt, um besser mit den Problemen umzugehen?</label>
-        <textarea id="ip_bedarf" name="ip_bedarf" rows="3" class="field-textarea"><%= akten.ip_bedarf || '' %></textarea>
-      </div>
-      <div>
-        <label class="mb-1 block text-xs font-medium text-slate-600" for="ip_pflege">Was kann ich als Pflegeperson dazu beitragen?</label>
-        <textarea id="ip_pflege" name="ip_pflege" rows="3" class="field-textarea"><%= akten.ip_pflege || '' %></textarea>
-      </div>
+      <%- include('field-textarea-segmented', { name: 'ip_gemeinsam_verstaendnis', label: 'Gemeinsames Verständnis und Beurteilung der Probleme und Bedürfnisse', rows: 3 }) %>
+      <%- include('field-textarea-segmented', { name: 'ip_ressourcen', label: 'Ressourcen — was hat früher und bisher geholfen?', rows: 3 }) %>
+      <%- include('field-textarea-segmented', { name: 'ip_bedarf', label: 'Was brauchen Sie jetzt, um besser mit den Problemen umzugehen?', rows: 3 }) %>
+      <%- include('field-textarea-segmented', { name: 'ip_pflege', label: 'Was kann ich als Pflegeperson dazu beitragen?', rows: 3 }) %>
     </div>
     <div class="mt-6 flex justify-end border-t border-slate-100 pt-4">
       <button type="submit" class="rounded-lg bg-klinik-blue px-5 py-2 text-sm font-semibold text-white shadow hover:bg-blue-900">Interprofessionelle Planung speichern</button>

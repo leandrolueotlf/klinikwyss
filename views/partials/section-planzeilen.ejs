@@ -1,3 +1,4 @@
+<% var redirectPage = typeof redirectPage !== 'undefined' ? redirectPage : 'massnahmen'; %>
 <section id="sec-plan" class="form-section scroll-mt-24 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
   <div class="flex flex-col gap-2 border-b border-slate-100 bg-slate-50 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
     <div>
@@ -24,13 +25,14 @@
           <th class="px-3 py-2 font-medium">Maßnahme</th>
           <th class="px-3 py-2 font-medium">Bis wann</th>
           <th class="px-3 py-2 font-medium">Evaluation</th>
-          <th class="px-3 py-2 font-medium">Wer (INES-User)</th>
+          <th class="px-3 py-2 font-medium">Wer (INES)</th>
           <th class="px-3 py-2 font-medium">Status</th>
           <th class="px-3 py-2 font-medium">Aktionen</th>
         </tr>
       </thead>
       <tbody class="divide-y divide-slate-100">
         <% planungen.forEach(function (row) { %>
+        <% var erRole = row.ersteller_role || 'unknown'; %>
         <tr class="align-top hover:bg-slate-50/80">
           <td class="whitespace-nowrap px-3 py-3 text-slate-600"><%= formatDatum(row.datum) %></td>
           <td class="px-3 py-3 text-slate-800"><%= row.thema || '—' %></td>
@@ -39,7 +41,9 @@
           <td class="whitespace-nowrap px-3 py-3 text-slate-600"><%= row.bis_wann || '—' %></td>
           <td class="px-3 py-3 text-slate-600"><%= row.evaluation || '—' %></td>
           <td class="px-3 py-3 text-xs text-slate-800">
-            <div class="font-semibold text-slate-900">Erfasst: <%= row.ersteller || '—' %></div>
+            <div class="font-semibold">
+              <span class="seg seg-<%= erRole %> inline-block rounded px-1 py-0.5" title="<%= roleLabels[erRole] || erRole %>"><%= row.ersteller || '—' %></span>
+            </div>
             <% 
               var lz = row.letzte_aenderung_von;
               var la = row.letzte_aenderung_am;
@@ -57,8 +61,7 @@
           <td class="px-3 py-3">
             <div class="flex flex-col gap-2">
               <form method="post" action="<%= basePath %>/plan/status" class="flex flex-wrap items-center gap-1">
-                <input type="hidden" name="fallnr" value="<%= fallnr %>" />
-                <input type="hidden" name="user" value="<%= userRaw %>" />
+                <%- include('form-plan-context') %>
                 <input type="hidden" name="id" value="<%= row.id %>" />
                 <select name="status" class="max-w-[10rem] rounded border border-slate-300 bg-white px-1 py-1 text-xs">
                   <% statusOptions.forEach(function (s) { %>
@@ -68,8 +71,7 @@
                 <button type="submit" class="rounded bg-klinik-blue px-2 py-1 text-xs font-medium text-white hover:bg-blue-900">OK</button>
               </form>
               <form method="post" action="<%= basePath %>/plan/delete" onsubmit="return confirm('Eintrag wirklich löschen?');">
-                <input type="hidden" name="fallnr" value="<%= fallnr %>" />
-                <input type="hidden" name="user" value="<%= userRaw %>" />
+                <%- include('form-plan-context') %>
                 <input type="hidden" name="id" value="<%= row.id %>" />
                 <button type="submit" class="rounded border border-red-200 bg-white px-2 py-1 text-xs font-medium text-red-700 hover:bg-red-50">Löschen</button>
               </form>
@@ -84,11 +86,10 @@
   <div id="plan-new-form" class="scroll-mt-24 border-t border-slate-100 p-4 sm:p-6">
     <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
       <h3 class="text-sm font-semibold text-slate-800">Neuen Plan-Eintrag erfassen</h3>
-      <span class="text-xs text-slate-500">Wird gespeichert als: <strong><%= userLabel %></strong></span>
+      <span class="text-xs text-slate-500">Speichern als: <strong class="seg seg-<%= role %>"><%= userLabel %></strong> · <strong><%= roleLabel %></strong></span>
     </div>
     <form method="post" action="<%= basePath %>/plan" class="space-y-4">
-      <input type="hidden" name="fallnr" value="<%= fallnr %>" />
-      <input type="hidden" name="user" value="<%= userRaw %>" />
+      <%- include('form-plan-context') %>
       <div>
         <label class="mb-1 block text-xs font-medium text-slate-600" for="thema">Individuelles Thema</label>
         <input id="thema" name="thema" type="text" class="field-input" placeholder="optional" />

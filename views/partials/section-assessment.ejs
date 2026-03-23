@@ -1,14 +1,20 @@
+<% var redirectPage = typeof redirectPage !== 'undefined' ? redirectPage : 'beurteilung'; %>
 <section id="sec-assessment" class="form-section scroll-mt-24 rounded-xl border border-slate-200 bg-white shadow-sm">
   <div class="border-b border-slate-100 bg-slate-50 px-4 py-3">
     <h2 class="text-base font-semibold text-klinik-blue">Beurteilung &amp; Kontext</h2>
     <p class="mt-1 text-xs text-slate-600">Aktuelle Situation, Arbeit, Finanzen, Ziele, Wohnen, Soziales, Erfahrung</p>
     <% if (typeof sectionAudit !== 'undefined' && sectionAudit && sectionAudit.assessment) { %>
-    <p class="mt-2 text-xs text-slate-500">Zuletzt gespeichert: <strong class="text-slate-700"><%= sectionAudit.assessment.by %></strong> · <%= formatDatum(sectionAudit.assessment.at) %></p>
+    <p class="mt-2 text-xs text-slate-500">
+      Zuletzt gespeichert: <strong class="text-slate-700"><%= sectionAudit.assessment.by %></strong>
+      <% if (sectionAudit.assessment.role) { %>
+      <span class="seg seg-<%= sectionAudit.assessment.role %> ml-1 inline-block rounded px-1.5 py-0.5 text-[11px] font-semibold"><%= roleLabels[sectionAudit.assessment.role] || sectionAudit.assessment.role %></span>
+      <% } %>
+      · <%= formatDatum(sectionAudit.assessment.at) %>
+    </p>
     <% } %>
   </div>
   <form method="post" action="<%= basePath %>/plan/fallakte" class="p-4 sm:p-5">
-    <input type="hidden" name="fallnr" value="<%= fallnr %>" />
-    <input type="hidden" name="user" value="<%= userRaw %>" />
+    <%- include('form-plan-context') %>
     <input type="hidden" name="section" value="assessment" />
     <div class="grid gap-8 md:grid-cols-2">
       <div class="space-y-4">
@@ -23,76 +29,31 @@
           ['psy_risiko', 'Suizidalität, selbstschädigendes Verhalten, Fremdgefährdung, Entweichungsrisiko'],
           ['psy_besonderheiten', 'Besonderheiten (Haustierbetreuung, Kinderbetreuung während PKW usw.)'],
         ]; %>
-        <% psy.forEach(function ([name, label]) { %>
-        <div>
-          <label class="mb-1 block text-xs font-medium text-slate-600" for="<%= name %>"><%= label %></label>
-          <textarea id="<%= name %>" name="<%= name %>" rows="2" class="field-textarea"><%= akten[name] || '' %></textarea>
-        </div>
+        <% psy.forEach(function ([fname, flabel]) { %>
+        <%- include('field-textarea-segmented', { name: fname, label: flabel, rows: 2 }) %>
         <% }); %>
         <h3 class="pt-4 text-sm font-semibold text-klinik-blue">Arbeitssituation</h3>
-        <div>
-          <label class="mb-1 block text-xs font-medium text-slate-600" for="arbeit_beruf">Angaben zum beruflichen Alltag</label>
-          <textarea id="arbeit_beruf" name="arbeit_beruf" rows="2" class="field-textarea"><%= akten.arbeit_beruf || '' %></textarea>
-        </div>
-        <div>
-          <label class="mb-1 block text-xs font-medium text-slate-600" for="arbeit_grad">Beschäftigungsgrad und Arbeitgeber</label>
-          <textarea id="arbeit_grad" name="arbeit_grad" rows="2" class="field-textarea"><%= akten.arbeit_grad || '' %></textarea>
-        </div>
+        <%- include('field-textarea-segmented', { name: 'arbeit_beruf', label: 'Angaben zum beruflichen Alltag', rows: 2 }) %>
+        <%- include('field-textarea-segmented', { name: 'arbeit_grad', label: 'Beschäftigungsgrad und Arbeitgeber', rows: 2 }) %>
         <h3 class="pt-4 text-sm font-semibold text-klinik-blue">Finanzielle Situation</h3>
-        <div>
-          <label class="mb-1 block text-xs font-medium text-slate-600" for="finanz_situation">Aktuelle finanzielle Situation</label>
-          <textarea id="finanz_situation" name="finanz_situation" rows="2" class="field-textarea"><%= akten.finanz_situation || '' %></textarea>
-        </div>
-        <div>
-          <label class="mb-1 block text-xs font-medium text-slate-600" for="finanz_schulden">Schulden und Schuldenberatung</label>
-          <textarea id="finanz_schulden" name="finanz_schulden" rows="2" class="field-textarea"><%= akten.finanz_schulden || '' %></textarea>
-        </div>
-        <div>
-          <label class="mb-1 block text-xs font-medium text-slate-600" for="finanz_sozialhilfe">Sozialhilfe, Ergänzungsleistungen usw.</label>
-          <textarea id="finanz_sozialhilfe" name="finanz_sozialhilfe" rows="2" class="field-textarea"><%= akten.finanz_sozialhilfe || '' %></textarea>
-        </div>
+        <%- include('field-textarea-segmented', { name: 'finanz_situation', label: 'Aktuelle finanzielle Situation', rows: 2 }) %>
+        <%- include('field-textarea-segmented', { name: 'finanz_schulden', label: 'Schulden und Schuldenberatung', rows: 2 }) %>
+        <%- include('field-textarea-segmented', { name: 'finanz_sozialhilfe', label: 'Sozialhilfe, Ergänzungsleistungen usw.', rows: 2 }) %>
       </div>
       <div class="space-y-4">
         <h3 class="text-sm font-semibold text-klinik-blue">Ziele</h3>
-        <div>
-          <label class="mb-1 block text-xs font-medium text-slate-600" for="ziele_wuenschen">Was wünschen Sie sich?</label>
-          <textarea id="ziele_wuenschen" name="ziele_wuenschen" rows="2" class="field-textarea"><%= akten.ziele_wuenschen || '' %></textarea>
-        </div>
-        <div>
-          <label class="mb-1 block text-xs font-medium text-slate-600" for="ziele_aenderung">Was soll sich ändern?</label>
-          <textarea id="ziele_aenderung" name="ziele_aenderung" rows="2" class="field-textarea"><%= akten.ziele_aenderung || '' %></textarea>
-        </div>
+        <%- include('field-textarea-segmented', { name: 'ziele_wuenschen', label: 'Was wünschen Sie sich?', rows: 2 }) %>
+        <%- include('field-textarea-segmented', { name: 'ziele_aenderung', label: 'Was soll sich ändern?', rows: 2 }) %>
         <h3 class="pt-4 text-sm font-semibold text-klinik-blue">Wohnsituation</h3>
-        <div>
-          <label class="mb-1 block text-xs font-medium text-slate-600" for="wohn_situation">Aktuelle Wohnsituation</label>
-          <textarea id="wohn_situation" name="wohn_situation" rows="2" class="field-textarea"><%= akten.wohn_situation || '' %></textarea>
-        </div>
+        <%- include('field-textarea-segmented', { name: 'wohn_situation', label: 'Aktuelle Wohnsituation', rows: 2 }) %>
         <h3 class="pt-4 text-sm font-semibold text-klinik-blue">Soziale Situation</h3>
-        <div>
-          <label class="mb-1 block text-xs font-medium text-slate-600" for="sozial_situation">Partnerschaft, Kinder inkl. Alter</label>
-          <textarea id="sozial_situation" name="sozial_situation" rows="2" class="field-textarea"><%= akten.sozial_situation || '' %></textarea>
-        </div>
-        <div>
-          <label class="mb-1 block text-xs font-medium text-slate-600" for="sozial_bezug">Wichtige Bezugspersonen</label>
-          <textarea id="sozial_bezug" name="sozial_bezug" rows="2" class="field-textarea"><%= akten.sozial_bezug || '' %></textarea>
-        </div>
-        <div>
-          <label class="mb-1 block text-xs font-medium text-slate-600" for="sozial_stellen">Involvierte Stellen (KESB, IV, Sozialdienst, …)</label>
-          <textarea id="sozial_stellen" name="sozial_stellen" rows="2" class="field-textarea"><%= akten.sozial_stellen || '' %></textarea>
-        </div>
+        <%- include('field-textarea-segmented', { name: 'sozial_situation', label: 'Partnerschaft, Kinder inkl. Alter', rows: 2 }) %>
+        <%- include('field-textarea-segmented', { name: 'sozial_bezug', label: 'Wichtige Bezugspersonen', rows: 2 }) %>
+        <%- include('field-textarea-segmented', { name: 'sozial_stellen', label: 'Involvierte Stellen (KESB, IV, Sozialdienst, …)', rows: 2 }) %>
         <h3 class="pt-4 text-sm font-semibold text-klinik-blue">Erfahrung stationär und ambulant</h3>
-        <div>
-          <label class="mb-1 block text-xs font-medium text-slate-600" for="erf_stationaer">Stationäre / teilstationäre Aufenthalte</label>
-          <textarea id="erf_stationaer" name="erf_stationaer" rows="2" class="field-textarea"><%= akten.erf_stationaer || '' %></textarea>
-        </div>
-        <div>
-          <label class="mb-1 block text-xs font-medium text-slate-600" for="erf_ambulant">Ambulante Behandlungen</label>
-          <textarea id="erf_ambulant" name="erf_ambulant" rows="2" class="field-textarea"><%= akten.erf_ambulant || '' %></textarea>
-        </div>
-        <div>
-          <label class="mb-1 block text-xs font-medium text-slate-600" for="erf_netz">Ambulantes Netz (Kontaktdaten)</label>
-          <textarea id="erf_netz" name="erf_netz" rows="3" class="field-textarea"><%= akten.erf_netz || '' %></textarea>
-        </div>
+        <%- include('field-textarea-segmented', { name: 'erf_stationaer', label: 'Stationäre / teilstationäre Aufenthalte', rows: 2 }) %>
+        <%- include('field-textarea-segmented', { name: 'erf_ambulant', label: 'Ambulante Behandlungen', rows: 2 }) %>
+        <%- include('field-textarea-segmented', { name: 'erf_netz', label: 'Ambulantes Netz (Kontaktdaten)', rows: 3 }) %>
       </div>
     </div>
     <div class="mt-6 flex justify-end border-t border-slate-100 pt-4">

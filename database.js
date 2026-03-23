@@ -1,6 +1,10 @@
 const fs = require("fs");
 const path = require("path");
 const sqlite3 = require("sqlite3").verbose();
+const {
+  mergeFieldSegments,
+  normalizeRole,
+} = require("./lib/segmentMerge");
 
 const dataDir = path.join(__dirname, "data");
 const dbPath = process.env.DB_PATH || path.join(dataDir, "planungen.db");
@@ -76,6 +80,21 @@ async function migrate() {
     "ersteller",
     "ersteller TEXT DEFAULT ''"
   );
+  await ensureColumn(
+    "fallakten",
+    "field_segments_json",
+    "field_segments_json TEXT DEFAULT '{}'"
+  );
+  await ensureColumn(
+    "planungen",
+    "ersteller_role",
+    "ersteller_role TEXT DEFAULT 'pflege'"
+  );
+  await ensureColumn(
+    "systemgespraeche",
+    "ersteller_role",
+    "ersteller_role TEXT DEFAULT 'pflege'"
+  );
 }
 
 function emptyFallakte(fallnr) {
@@ -125,6 +144,7 @@ function emptyFallakte(fallnr) {
     ip_bedarf: "",
     ip_pflege: "",
     section_audit_json: "{}",
+    field_segments_json: "{}",
   };
 }
 
@@ -255,7 +275,8 @@ async function init() {
       ip_ressourcen TEXT,
       ip_bedarf TEXT,
       ip_pflege TEXT,
-      section_audit_json TEXT DEFAULT '{}'
+      section_audit_json TEXT DEFAULT '{}',
+      field_segments_json TEXT DEFAULT '{}'
     )
   `);
 
@@ -301,6 +322,9 @@ async function saveFallakteMerged(fallnr, patch) {
   if (merged.section_audit_json == null || merged.section_audit_json === "") {
     merged.section_audit_json = "{}";
   }
+  if (merged.field_segments_json == null || merged.field_segments_json === "") {
+    merged.field_segments_json = "{}";
+  }
 
   await run(
     `INSERT OR REPLACE INTO fallakten (
@@ -315,9 +339,9 @@ async function saveFallakteMerged(fallnr, patch) {
       erf_stationaer, erf_ambulant, erf_netz,
       ip_situation_zusammenfassung, ip_priorisierung_json,
       ip_gemeinsam_verstaendnis, ip_ressourcen, ip_bedarf, ip_pflege,
-      section_audit_json
+      section_audit_json, field_segments_json
     ) VALUES (
-      ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+      ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
     )`,
     [
       merged.fallnr,
@@ -364,6 +388,7 @@ async function saveFallakteMerged(fallnr, patch) {
       merged.ip_bedarf,
       merged.ip_pflege,
       merged.section_audit_json,
+      merged.field_segments_json,
     ]
   );
 }
@@ -418,6 +443,12 @@ function patchFromSection(section, body) {
   return p;
 }
 
+const SKIP_FIELD_SEGMENTS = new Set([
+  "section_audit_json",
+  "ip_priorisierung_json",
+  "aust_notfallplan",
+]);
+
 async function saveFallakteSection(fallnr, section, body) {
   const patch = patchFromSection(section, body);
   const base = (await getFallakte(fallnr)) || emptyFallakte(fallnr);
@@ -428,14 +459,39 @@ async function saveFallakteSection(fallnr, section, body) {
     audit = {};
   }
   const by = str(body, "user");
-  audit[section] = { by: by || "—", at: new Date().toISOString() };
+  const role = normalizeRole(str(body, "role"));
+  audit[section] = {
+    by: by || "—",
+    at: new Date().toISOString(),
+    role,
+  };
   patch.section_audit_json = JSON.stringify(audit);
+
+  let segMap = {};
+  try {
+    segMap = JSON.parse(base.field_segments_json || "{}");
+  } catch (e) {
+    segMap = {};
+  }
+  for (const key of Object.keys(patch)) {
+    if (key === "section_audit_json") continue;
+    if (SKIP_FIELD_SEGMENTS.has(key)) continue;
+    const patchVal = patch[key];
+    if (typeof patchVal === "number") continue;
+    const oldV = base[key] != null ? String(base[key]) : "";
+    const newV = patchVal != null ? String(patchVal) : "";
+    if (oldV === newV) continue;
+    const oldSegs = segMap[key];
+    segMap[key] = mergeFieldSegments(oldV, newV, oldSegs, role, by);
+  }
+  patch.field_segments_json = JSON.stringify(segMap);
+
   await saveFallakteMerged(fallnr, patch);
 }
 
 function listByFallnr(fallnr) {
   return all(
-    `SELECT id, fallnr, ersteller, datum, thema, ziel, massnahme, bis_wann, evaluation, status,
+    `SELECT id, fallnr, ersteller, ersteller_role, datum, thema, ziel, massnahme, bis_wann, evaluation, status,
             letzte_aenderung_von, letzte_aenderung_am
      FROM planungen
      WHERE fallnr = ?
@@ -444,15 +500,26 @@ function listByFallnr(fallnr) {
   );
 }
 
-function create({ fallnr, ersteller, thema, ziel, massnahme, bis_wann, evaluation }) {
+function create({
+  fallnr,
+  ersteller,
+  ersteller_role,
+  thema,
+  ziel,
+  massnahme,
+  bis_wann,
+  evaluation,
+}) {
   const datum = new Date().toISOString();
   const von = String(ersteller || "");
+  const rol = normalizeRole(ersteller_role);
   return run(
-    `INSERT INTO planungen (fallnr, ersteller, datum, thema, ziel, massnahme, bis_wann, evaluation, status, letzte_aenderung_von, letzte_aenderung_am)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'Offen', ?, ?)`,
+    `INSERT INTO planungen (fallnr, ersteller, ersteller_role, datum, thema, ziel, massnahme, bis_wann, evaluation, status, letzte_aenderung_von, letzte_aenderung_am)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'Offen', ?, ?)`,
     [
       String(fallnr),
       von,
+      rol,
       datum,
       String(thema || ""),
       String(ziel),
@@ -485,7 +552,7 @@ function deleteRow({ id, fallnr }) {
 
 function listSystemgespraeche(fallnr) {
   return all(
-    `SELECT id, fallnr, ziele_thema, wann, beteiligte, zusammenfassung, created_at, ersteller
+    `SELECT id, fallnr, ziele_thema, wann, beteiligte, zusammenfassung, created_at, ersteller, ersteller_role
      FROM systemgespraeche WHERE fallnr = ? ORDER BY id DESC`,
     [String(fallnr)]
   );
@@ -498,11 +565,13 @@ function createSystemgespraech({
   beteiligte,
   zusammenfassung,
   ersteller,
+  ersteller_role,
 }) {
   const created_at = new Date().toISOString();
+  const rol = normalizeRole(ersteller_role);
   return run(
-    `INSERT INTO systemgespraeche (fallnr, ziele_thema, wann, beteiligte, zusammenfassung, created_at, ersteller)
-     VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    `INSERT INTO systemgespraeche (fallnr, ziele_thema, wann, beteiligte, zusammenfassung, created_at, ersteller, ersteller_role)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       String(fallnr),
       String(ziele_thema || ""),
@@ -511,6 +580,7 @@ function createSystemgespraech({
       String(zusammenfassung || ""),
       created_at,
       String(ersteller || ""),
+      rol,
     ]
   );
 }

@@ -75,3 +75,39 @@ body {
 .form-section h3 {
   letter-spacing: -0.01em;
 }
+
+/* Berufsgruppen: Farbcodierung pro Zeile / Hover-Tooltip */
+.segment-preview {
+  word-break: break-word;
+}
+
+.seg {
+  display: inline;
+  border-bottom: 2px solid transparent;
+  cursor: help;
+  transition: background-color 0.12s ease, border-color 0.12s ease;
+}
+
+.seg:hover {
+  background-color: rgba(15, 23, 42, 0.06);
+}
+
+.seg-pflege {
+  color: #1d4ed8;
+  border-bottom-color: rgba(37, 99, 235, 0.45);
+}
+
+.seg-arzt {
+  color: #b91c1c;
+  border-bottom-color: rgba(220, 38, 38, 0.5);
+}
+
+.seg-psychologie {
+  color: #15803d;
+  border-bottom-color: rgba(22, 163, 74, 0.5);
+}
+
+.seg-unknown {
+  color: #475569;
+  border-bottom-color: rgba(71, 85, 105, 0.45);
+}

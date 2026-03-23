@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title><%= pageTitle %> — Fall <%= fallnr %></title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: { klinik: { blue: "#1e40af" } },
+          },
+        },
+      };
+    </script>
+    <link rel="stylesheet" href="<%= basePath %>/style.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body class="min-h-screen bg-slate-50 font-sans text-slate-900 antialiased" style="font-family: Inter, Arial, sans-serif">
+    <header class="border-b border-slate-200 bg-klinik-blue text-white shadow-md">
+      <div class="mx-auto max-w-6xl px-3 py-4 sm:px-4">
+        <p class="text-xs font-medium uppercase tracking-wide text-blue-100">Digitale Behandlungsplanung</p>
+        <div class="mt-1 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+          <div class="min-w-0">
+            <h1 class="text-lg font-semibold sm:text-xl">Fallnummer: <span class="font-bold"><%= fallnr %></span></h1>
+            <p class="mt-1 text-sm text-blue-100">
+              Benutzer (URL-Parameter <code class="rounded bg-black/20 px-1 text-[11px]">user</code>):
+              <span class="font-medium text-white"><%= userLabel %></span>
+            </p>
+            <p class="mt-2 max-w-2xl break-all rounded-md bg-black/15 px-2 py-1.5 text-[11px] leading-snug text-blue-50" title="Aktueller Link mit Fall, Benutzer und Rolle">
+              <span class="text-blue-200/90">Link dieser Seite:</span><br />
+              <span class="select-all font-mono text-white"><%= basePath %>/plan/<%= activePage %>?<%= planQs %></span>
+            </p>
+          </div>
+          <div class="flex max-w-xl flex-col gap-2 rounded-lg bg-blue-900/30 px-3 py-2 text-xs">
+            <p class="font-semibold text-blue-100">Berufsgruppe (Bearbeitung)</p>
+            <div class="flex flex-wrap gap-2">
+              <a
+                href="<%= basePath %>/plan/<%= activePage %>?<%= planQsPflege %>"
+                class="role-pill rounded-full px-3 py-1 font-medium <%= role === 'pflege' ? 'ring-2 ring-white ring-offset-2 ring-offset-blue-900' : '' %> bg-blue-500/70 hover:bg-blue-400/90"
+                >Pflege</a
+              >
+              <a
+                href="<%= basePath %>/plan/<%= activePage %>?<%= planQsArzt %>"
+                class="role-pill rounded-full px-3 py-1 font-medium <%= role === 'arzt' ? 'ring-2 ring-white ring-offset-2 ring-offset-blue-900' : '' %> bg-red-600/85 hover:bg-red-500/95"
+                >Ärzt*innen</a
+              >
+              <a
+                href="<%= basePath %>/plan/<%= activePage %>?<%= planQsPsychologie %>"
+                class="role-pill rounded-full px-3 py-1 font-medium <%= role === 'psychologie' ? 'ring-2 ring-white ring-offset-2 ring-offset-blue-900' : '' %> bg-emerald-600/85 hover:bg-emerald-500/95"
+                >Psycholog*innen</a
+              >
+            </div>
+            <p class="text-blue-100/90">
+              Rolle (URL <code class="rounded bg-black/20 px-1 text-[10px]">role</code>): <strong class="text-white"><%= roleLabel %></strong>
+              <span class="opacity-80">·</span>
+              <code class="rounded bg-black/20 px-1 py-0.5 text-[10px]">role=<%= role %></code>
+            </p>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="mx-auto max-w-6xl px-3 py-6 sm:px-4">
+      <% if (typeof flash !== 'undefined' && flash) { %>
+      <div class="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900" role="status"><%= flash %></div>
+      <% } %>
+      <% if (typeof error !== 'undefined' && error) { %>
+      <div class="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-900" role="alert"><%= error %></div>
+      <% } %>
+
+      <div class="flex flex-col gap-8 lg:flex-row lg:items-start lg:gap-10">
+        <div class="w-full shrink-0 lg:w-56 xl:w-60">
+          <%- include('nav-sidebar') %>
+        </div>
+        <div class="min-w-0 flex-1 space-y-8">
+          <p class="text-xs text-slate-600">
+            <strong class="text-slate-800">Farbcodierung:</strong> Nach dem Speichern erscheint über jedem Feld eine Vorschau. Jede <strong>Zeile</strong> hat eine Farbe nach der zuletzt speichernden Berufsgruppe; mit der Maus darüberfahren zeigt den Namen und die Zeit. Ändern Sie die Zeilenanzahl im Text, wird das gesamte Feld der neuen Speicherung zugeordnet.
+          </p>
