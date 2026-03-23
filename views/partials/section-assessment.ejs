@@ -1,9 +1,12 @@
-<section class="form-section mb-8 rounded-xl border border-slate-200 bg-white shadow-sm">
+<section id="sec-assessment" class="form-section scroll-mt-24 rounded-xl border border-slate-200 bg-white shadow-sm">
   <div class="border-b border-slate-100 bg-slate-50 px-4 py-3">
     <h2 class="text-base font-semibold text-klinik-blue">Beurteilung &amp; Kontext</h2>
     <p class="mt-1 text-xs text-slate-600">Aktuelle Situation, Arbeit, Finanzen, Ziele, Wohnen, Soziales, Erfahrung</p>
+    <% if (typeof sectionAudit !== 'undefined' && sectionAudit && sectionAudit.assessment) { %>
+    <p class="mt-2 text-xs text-slate-500">Zuletzt gespeichert: <strong class="text-slate-700"><%= sectionAudit.assessment.by %></strong> · <%= formatDatum(sectionAudit.assessment.at) %></p>
+    <% } %>
   </div>
-  <form method="post" action="/plan/fallakte" class="p-4 sm:p-5">
+  <form method="post" action="<%= basePath %>/plan/fallakte" class="p-4 sm:p-5">
     <input type="hidden" name="fallnr" value="<%= fallnr %>" />
     <input type="hidden" name="user" value="<%= userRaw %>" />
     <input type="hidden" name="section" value="assessment" />

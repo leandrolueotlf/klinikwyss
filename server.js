@@ -5,16 +5,33 @@ const db = require("./database");
 const app = express();
 const port = Number(process.env.PORT) || 3000;
 
+/**
+ * Basis-Pfad für alle Routen (z. B. INES-Einbettung).
+ * Standard: /pkw-demo  →  /pkw-demo/plan?fallnr=…
+ * Überschreiben: BASE_PATH=/andere/pfad
+ * Root ohne Präfix: BASE_PATH=/
+ */
+function normalizeBasePath(raw) {
+  if (raw === undefined || raw === "") return "/pkw-demo";
+  const s = String(raw).trim();
+  if (s === "/" || s === "") return "";
+  let out = s.startsWith("/") ? s : `/${s}`;
+  out = out.replace(/\/$/, "");
+  return out;
+}
+
+const BASE = normalizeBasePath(process.env.BASE_PATH);
+
 app.disable("x-powered-by");
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, "public")));
 
-/**
- * IT / INES: Zugriff auf die Planungsansicht nur mit Fallnummer in der Query-URL.
- * Ohne `fallnr` wird keine patientenbezogene Ansicht gerendert.
- */
+app.locals.basePath = BASE;
+app.locals.formatDatum = formatDatum;
+app.locals.statusClass = statusClass;
+app.locals.range10 = Array.from({ length: 10 }, (_, i) => i + 1);
+
 function requireFallnrQuery(req, res, next) {
   const fallnr = req.query.fallnr;
   if (!fallnr || String(fallnr).trim() === "") {
@@ -56,9 +73,13 @@ function statusClass(status) {
   return "offen";
 }
 
-app.locals.formatDatum = formatDatum;
-app.locals.statusClass = statusClass;
-app.locals.range10 = Array.from({ length: 10 }, (_, i) => i + 1);
+function parseSectionAudit(raw) {
+  try {
+    return JSON.parse(raw || "{}");
+  } catch {
+    return {};
+  }
+}
 
 function redirectToPlan(res, { fallnr, user }, extra = {}) {
   const q = new URLSearchParams();
@@ -67,7 +88,8 @@ function redirectToPlan(res, { fallnr, user }, extra = {}) {
   Object.entries(extra).forEach(([k, v]) => {
     if (v != null && v !== "") q.set(k, String(v));
   });
-  res.redirect(303, `/plan?${q.toString()}`);
+  const prefix = BASE || "";
+  res.redirect(303, `${prefix}/plan?${q.toString()}`);
 }
 
 function flashFromQuery(msg) {
@@ -97,11 +119,18 @@ function errorFromQuery(err) {
   return map[err] || null;
 }
 
-app.get("/api/health", (_req, res) => {
-  res.json({ ok: true, service: "klinikwyss", module: "behandlungsplanung" });
+const router = express.Router();
+
+router.get("/api/health", (_req, res) => {
+  res.json({
+    ok: true,
+    service: "klinikwyss",
+    module: "behandlungsplanung",
+    basePath: BASE || "/",
+  });
 });
 
-app.get("/plan", requireFallnrQuery, async (req, res) => {
+router.get("/plan", requireFallnrQuery, async (req, res) => {
   const fallnr = String(req.query.fallnr).trim();
   const userRaw = req.query.user != null ? String(req.query.user) : "";
   const userLabel = normalizeUser(req.query);
@@ -117,6 +146,7 @@ app.get("/plan", requireFallnrQuery, async (req, res) => {
     if (akten.aust_notfallplan == null) akten.aust_notfallplan = 0;
     const prioRows = db.parsePriorisierungJson(akten.ip_priorisierung_json);
     const systemgespraeche = await db.listSystemgespraeche(fallnr);
+    const sectionAudit = parseSectionAudit(akten.section_audit_json);
 
     res.render("index", {
       fallnr,
@@ -129,6 +159,7 @@ app.get("/plan", requireFallnrQuery, async (req, res) => {
       akten,
       prioRows,
       systemgespraeche,
+      sectionAudit,
     });
   } catch (e) {
     console.error(e);
@@ -143,11 +174,12 @@ app.get("/plan", requireFallnrQuery, async (req, res) => {
       akten: {},
       prioRows: db.parsePriorisierungJson("[]"),
       systemgespraeche: [],
+      sectionAudit: {},
     });
   }
 });
 
-app.post("/plan/fallakte", requireFallnrBody, async (req, res) => {
+router.post("/plan/fallakte", requireFallnrBody, async (req, res) => {
   const { fallnr, user, section } = req.body;
   const sec = String(section || "").trim();
   if (!["austritt", "assessment", "interprof"].includes(sec)) {
@@ -168,7 +200,7 @@ app.post("/plan/fallakte", requireFallnrBody, async (req, res) => {
   }
 });
 
-app.post("/plan/system", requireFallnrBody, async (req, res) => {
+router.post("/plan/system", requireFallnrBody, async (req, res) => {
   const { fallnr, user, ziele_thema, wann, beteiligte, zusammenfassung } =
     req.body;
   try {
@@ -178,6 +210,7 @@ app.post("/plan/system", requireFallnrBody, async (req, res) => {
       wann,
       beteiligte,
       zusammenfassung,
+      ersteller: user != null ? String(user) : "",
     });
     return redirectToPlan(res, { fallnr, user }, { msg: "saved_system" });
   } catch (e) {
@@ -186,7 +219,7 @@ app.post("/plan/system", requireFallnrBody, async (req, res) => {
   }
 });
 
-app.post("/plan/system/delete", requireFallnrBody, async (req, res) => {
+router.post("/plan/system/delete", requireFallnrBody, async (req, res) => {
   const { fallnr, user, id } = req.body;
   try {
     await db.deleteSystemgespraech({
@@ -200,7 +233,7 @@ app.post("/plan/system/delete", requireFallnrBody, async (req, res) => {
   }
 });
 
-app.post("/plan", requireFallnrBody, async (req, res) => {
+router.post("/plan", requireFallnrBody, async (req, res) => {
   const { fallnr, user, thema, ziel, massnahme, bis_wann, evaluation } =
     req.body;
   try {
@@ -224,13 +257,14 @@ app.post("/plan", requireFallnrBody, async (req, res) => {
   }
 });
 
-app.post("/plan/status", requireFallnrBody, async (req, res) => {
+router.post("/plan/status", requireFallnrBody, async (req, res) => {
   const { fallnr, user, id, status } = req.body;
   try {
     await db.updateStatus({
       id,
       fallnr: String(fallnr).trim(),
       status: String(status),
+      bearbeiter: user != null ? String(user) : "",
     });
     return redirectToPlan(res, { fallnr, user }, { msg: "updated" });
   } catch (e) {
@@ -239,7 +273,7 @@ app.post("/plan/status", requireFallnrBody, async (req, res) => {
   }
 });
 
-app.post("/plan/delete", requireFallnrBody, async (req, res) => {
+router.post("/plan/delete", requireFallnrBody, async (req, res) => {
   const { fallnr, user, id } = req.body;
   try {
     await db.deleteRow({ id, fallnr: String(fallnr).trim() });
@@ -250,14 +284,24 @@ app.post("/plan/delete", requireFallnrBody, async (req, res) => {
   }
 });
 
-app.use((_req, res) => {
-  res.status(404).sendFile(path.join(__dirname, "public", "404.html"));
+router.use((_req, res) => {
+  res.status(404).render("404");
 });
+
+const publicDir = path.join(__dirname, "public");
+if (BASE) {
+  app.get("/", (_req, res) => {
+    res.redirect(302, `${BASE}/`);
+  });
+}
+
+app.use(BASE || "/", express.static(publicDir));
+app.use(BASE || "/", router);
 
 async function main() {
   await db.init();
   app.listen(port, () => {
-    console.log(`Klinik Wyss listening on port ${port}`);
+    console.log(`Klinik Wyss listening on port ${port} (base: ${BASE || "/"})`);
   });
 }
 

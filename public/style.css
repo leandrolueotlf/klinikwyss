@@ -29,8 +29,23 @@
 }
 
 /* Schmale Einbettung: Tabellen scrollbar, keine festen Mindestbreiten außerhalb Tabelle */
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   -webkit-font-smoothing: antialiased;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+.nav-side-link:focus-visible {
+  outline: 2px solid #1e40af;
+  outline-offset: 2px;
 }
 
 .field-input,

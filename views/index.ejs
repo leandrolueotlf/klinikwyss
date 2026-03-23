@@ -14,7 +14,7 @@
         },
       };
     </script>
-    <link rel="stylesheet" href="/style.css" />
+    <link rel="stylesheet" href="<%= basePath %>/style.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -24,16 +24,16 @@
   </head>
   <body class="min-h-screen bg-slate-50 font-sans text-slate-900 antialiased" style="font-family: Inter, Arial, sans-serif">
     <header class="border-b border-slate-200 bg-klinik-blue text-white shadow-md">
-      <div class="mx-auto max-w-5xl px-3 py-4 sm:px-4">
+      <div class="mx-auto max-w-6xl px-3 py-4 sm:px-4">
         <p class="text-xs font-medium uppercase tracking-wide text-blue-100">Digitale Behandlungsplanung</p>
         <div class="mt-1 flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4">
           <h1 class="text-lg font-semibold sm:text-xl">Fallnummer: <span class="font-bold"><%= fallnr %></span></h1>
-          <p class="text-sm text-blue-100">Benutzer: <span class="font-medium text-white"><%= userLabel %></span></p>
+          <p class="text-sm text-blue-100">Benutzer (URL): <span class="font-medium text-white"><%= userLabel %></span></p>
         </div>
       </div>
     </header>
 
-    <main class="mx-auto max-w-5xl px-3 py-6 sm:px-4">
+    <div class="mx-auto max-w-6xl px-3 py-6 sm:px-4">
       <% if (typeof flash !== 'undefined' && flash) { %>
       <div class="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900" role="status"><%= flash %></div>
       <% } %>
@@ -41,15 +41,21 @@
       <div class="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-900" role="alert"><%= error %></div>
       <% } %>
 
-      <p class="mb-6 text-xs text-slate-600">
-        Alle Bereiche werden pro Fallnummer gespeichert. Nutzen Sie die Speichern-Buttons je Abschnitt.
-      </p>
-
-      <%- include('partials/section-assessment') %>
-      <%- include('partials/section-interprof') %>
-      <%- include('partials/section-planzeilen') %>
-      <%- include('partials/section-system') %>
-      <%- include('partials/section-austritt') %>
-    </main>
+      <div class="flex flex-col gap-8 lg:flex-row lg:items-start lg:gap-10">
+        <div class="w-full shrink-0 lg:w-56 xl:w-60">
+          <%- include('partials/nav-sidebar') %>
+        </div>
+        <div class="min-w-0 flex-1 space-y-8">
+          <p class="text-xs text-slate-600">
+            Speichern je Bereich. Tabellen: <strong class="text-slate-800">+ Zeile</strong> erweitert die Priorisierung; Behandlungsplan und Systemgespräche erfassen Sie über die Formulare unter der Tabelle.
+          </p>
+          <%- include('partials/section-assessment') %>
+          <%- include('partials/section-interprof') %>
+          <%- include('partials/section-planzeilen') %>
+          <%- include('partials/section-system') %>
+          <%- include('partials/section-austritt') %>
+        </div>
+      </div>
+    </div>
   </body>
 </html>

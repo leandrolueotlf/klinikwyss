@@ -1,13 +1,21 @@
-<section class="form-section mb-8 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-  <div class="border-b border-slate-100 bg-slate-50 px-4 py-3">
-    <h2 class="text-sm font-semibold text-slate-800">Behandlungsplan — Ziele &amp; Maßnahmen</h2>
-    <p class="mt-1 text-xs text-slate-600">Individuelle Themen, Ziele, Maßnahmen, Frist, Evaluation</p>
+<section id="sec-plan" class="form-section scroll-mt-24 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+  <div class="flex flex-col gap-2 border-b border-slate-100 bg-slate-50 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+    <div>
+      <h2 class="text-sm font-semibold text-slate-800">Behandlungsplan — Ziele &amp; Maßnahmen</h2>
+      <p class="mt-1 text-xs text-slate-600">Individuelle Themen, Ziele, Maßnahmen, Frist, Evaluation</p>
+    </div>
+    <a
+      href="#plan-new-form"
+      class="inline-flex shrink-0 items-center gap-1 rounded-lg border border-klinik-blue bg-white px-3 py-1.5 text-xs font-semibold text-klinik-blue hover:bg-blue-50"
+    >
+      <span class="text-base leading-none">+</span> Eintrag
+    </a>
   </div>
   <div class="overflow-x-auto">
     <% if (!planungen || planungen.length === 0) { %>
-    <p class="px-4 py-8 text-center text-sm text-slate-500">Noch keine Einträge für diesen Fall.</p>
+    <p class="px-4 py-8 text-center text-sm text-slate-500">Noch keine Einträge für diesen Fall. Unten mit <strong>+ Eintrag</strong> oder Formular erfassen.</p>
     <% } else { %>
-    <table class="w-full min-w-[900px] text-left text-sm">
+    <table class="w-full min-w-[920px] text-left text-sm">
       <thead>
         <tr class="border-b border-slate-200 bg-white text-xs uppercase tracking-wide text-slate-500">
           <th class="px-3 py-2 font-medium">Datum</th>
@@ -16,7 +24,7 @@
           <th class="px-3 py-2 font-medium">Maßnahme</th>
           <th class="px-3 py-2 font-medium">Bis wann</th>
           <th class="px-3 py-2 font-medium">Evaluation</th>
-          <th class="px-3 py-2 font-medium">Ersteller</th>
+          <th class="px-3 py-2 font-medium">Wer (INES-User)</th>
           <th class="px-3 py-2 font-medium">Status</th>
           <th class="px-3 py-2 font-medium">Aktionen</th>
         </tr>
@@ -30,13 +38,25 @@
           <td class="px-3 py-3 text-slate-700"><%= row.massnahme %></td>
           <td class="whitespace-nowrap px-3 py-3 text-slate-600"><%= row.bis_wann || '—' %></td>
           <td class="px-3 py-3 text-slate-600"><%= row.evaluation || '—' %></td>
-          <td class="whitespace-nowrap px-3 py-3 text-slate-600"><%= row.ersteller %></td>
+          <td class="px-3 py-3 text-xs text-slate-800">
+            <div class="font-semibold text-slate-900">Erfasst: <%= row.ersteller || '—' %></div>
+            <% 
+              var lz = row.letzte_aenderung_von;
+              var la = row.letzte_aenderung_am;
+              var showZ = lz && la && (String(la) !== String(row.datum) || String(lz) !== String(row.ersteller));
+            %>
+            <% if (showZ) { %>
+            <div class="mt-1 text-[11px] font-normal text-slate-600">
+              Zuletzt (Status): <%= lz %> · <%= formatDatum(la) %>
+            </div>
+            <% } %>
+          </td>
           <td class="px-3 py-3">
             <span class="status-badge status-<%= statusClass(row.status) %>"><%= row.status %></span>
           </td>
           <td class="px-3 py-3">
             <div class="flex flex-col gap-2">
-              <form method="post" action="/plan/status" class="flex flex-wrap items-center gap-1">
+              <form method="post" action="<%= basePath %>/plan/status" class="flex flex-wrap items-center gap-1">
                 <input type="hidden" name="fallnr" value="<%= fallnr %>" />
                 <input type="hidden" name="user" value="<%= userRaw %>" />
                 <input type="hidden" name="id" value="<%= row.id %>" />
@@ -47,7 +67,7 @@
                 </select>
                 <button type="submit" class="rounded bg-klinik-blue px-2 py-1 text-xs font-medium text-white hover:bg-blue-900">OK</button>
               </form>
-              <form method="post" action="/plan/delete" onsubmit="return confirm('Eintrag wirklich löschen?');">
+              <form method="post" action="<%= basePath %>/plan/delete" onsubmit="return confirm('Eintrag wirklich löschen?');">
                 <input type="hidden" name="fallnr" value="<%= fallnr %>" />
                 <input type="hidden" name="user" value="<%= userRaw %>" />
                 <input type="hidden" name="id" value="<%= row.id %>" />
@@ -61,9 +81,12 @@
     </table>
     <% } %>
   </div>
-  <div class="border-t border-slate-100 p-4 sm:p-6">
-    <h3 class="mb-4 text-sm font-semibold text-slate-800">Neuen Plan-Eintrag erfassen</h3>
-    <form method="post" action="/plan" class="space-y-4">
+  <div id="plan-new-form" class="scroll-mt-24 border-t border-slate-100 p-4 sm:p-6">
+    <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
+      <h3 class="text-sm font-semibold text-slate-800">Neuen Plan-Eintrag erfassen</h3>
+      <span class="text-xs text-slate-500">Wird gespeichert als: <strong><%= userLabel %></strong></span>
+    </div>
+    <form method="post" action="<%= basePath %>/plan" class="space-y-4">
       <input type="hidden" name="fallnr" value="<%= fallnr %>" />
       <input type="hidden" name="user" value="<%= userRaw %>" />
       <div>

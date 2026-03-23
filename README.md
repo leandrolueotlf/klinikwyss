@@ -4,13 +4,17 @@ Express-App mit **Digitale Behandlungsplanung** (SQLite, EJS, Tailwind per CDN).
 
 ## INES-Modul
 
+Alle Routen sind unter einem **Basis-Pfad** gebunden (Standard **`/pkw-demo`**), damit die App z. B. in INES als Unterpfad eingebunden werden kann.
+
 Aufruf mit Query-Parametern:
 
-`/plan?fallnr=<Fallnummer>&user=<Kürzel>`
+`/pkw-demo/plan?fallnr=<Fallnummer>&user=<Kürzel>`
 
-Beispiel: `/plan?fallnr=123&user=m.jungi`
+Beispiel: `/pkw-demo/plan?fallnr=123&user=m.jungi`
 
-Ohne `fallnr`: Hinweis „Kein Patient ausgewählt“.
+- **Anpassen:** Umgebungsvariable `BASE_PATH` (siehe `.env.example`). `BASE_PATH=/` legt die App an der Wurzel ab.
+- **Ohne `fallnr`:** Hinweis „Kein Patient ausgewählt“.
+- **Startseite:** `http://localhost:3000/` leitet auf `/pkw-demo/` weiter (lokal).
 
 ## Lokales Testen
 
@@ -19,9 +23,9 @@ npm install
 npm start
 ```
 
-- Startseite: <http://localhost:3000>
-- Planung (Demo): <http://localhost:3000/plan?fallnr=DEMO&user=demo>
-- Health: <http://localhost:3000/api/health>
+- Startseite: <http://localhost:3000> → `/pkw-demo/`
+- Planung (Demo): <http://localhost:3000/pkw-demo/plan?fallnr=DEMO&user=demo>
+- Health: <http://localhost:3000/pkw-demo/api/health>
 
 Die SQLite-Datei liegt unter `data/planungen.db` (nicht im Repo; Ordner `data/` ist versioniert mit `.gitkeep`). Optional: `DB_PATH=/pfad/zur/db` setzen.
 

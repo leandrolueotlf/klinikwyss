@@ -56,6 +56,26 @@ async function migrate() {
   await ensureColumn("planungen", "thema", "thema TEXT DEFAULT ''");
   await ensureColumn("planungen", "bis_wann", "bis_wann TEXT DEFAULT ''");
   await ensureColumn("planungen", "evaluation", "evaluation TEXT DEFAULT ''");
+  await ensureColumn(
+    "planungen",
+    "letzte_aenderung_von",
+    "letzte_aenderung_von TEXT DEFAULT ''"
+  );
+  await ensureColumn(
+    "planungen",
+    "letzte_aenderung_am",
+    "letzte_aenderung_am TEXT DEFAULT ''"
+  );
+  await ensureColumn(
+    "fallakten",
+    "section_audit_json",
+    "section_audit_json TEXT DEFAULT '{}'"
+  );
+  await ensureColumn(
+    "systemgespraeche",
+    "ersteller",
+    "ersteller TEXT DEFAULT ''"
+  );
 }
 
 function emptyFallakte(fallnr) {
@@ -104,6 +124,7 @@ function emptyFallakte(fallnr) {
     ip_ressourcen: "",
     ip_bedarf: "",
     ip_pflege: "",
+    section_audit_json: "{}",
   };
 }
 
@@ -113,8 +134,16 @@ function str(body, key) {
 }
 
 function parsePriorisierungFromBody(body) {
+  const indices = new Set();
+  if (body && typeof body === "object") {
+    Object.keys(body).forEach((k) => {
+      const m = k.match(/^prio_(\d+)_problem$/);
+      if (m) indices.add(Number(m[1]));
+    });
+  }
+  const max = indices.size ? Math.max(...indices) : -1;
   const rows = [];
-  for (let i = 0; i < 5; i += 1) {
+  for (let i = 0; i <= max; i += 1) {
     rows.push({
       problem: str(body, `prio_${i}_problem`),
       leiden: str(body, `prio_${i}_leiden`),
@@ -128,20 +157,16 @@ function parsePriorisierungFromBody(body) {
 function parsePriorisierungJson(raw) {
   try {
     const j = JSON.parse(raw || "[]");
-    if (!Array.isArray(j)) return Array(5).fill(null).map(() => emptyPrioRow());
-    const out = [];
-    for (let i = 0; i < 5; i += 1) {
-      const r = j[i] || {};
-      out.push({
-        problem: r.problem != null ? String(r.problem) : "",
-        leiden: r.leiden != null ? String(r.leiden) : "",
-        alltag: r.alltag != null ? String(r.alltag) : "",
-        kontrolle: r.kontrolle != null ? String(r.kontrolle) : "",
-      });
-    }
-    return out;
+    if (!Array.isArray(j)) return [emptyPrioRow()];
+    if (j.length === 0) return [emptyPrioRow()];
+    return j.map((r) => ({
+      problem: r && r.problem != null ? String(r.problem) : "",
+      leiden: r && r.leiden != null ? String(r.leiden) : "",
+      alltag: r && r.alltag != null ? String(r.alltag) : "",
+      kontrolle: r && r.kontrolle != null ? String(r.kontrolle) : "",
+    }));
   } catch {
-    return Array(5).fill(null).map(() => emptyPrioRow());
+    return [emptyPrioRow()];
   }
 }
 
@@ -217,7 +242,8 @@ async function init() {
       ip_gemeinsam_verstaendnis TEXT,
       ip_ressourcen TEXT,
       ip_bedarf TEXT,
-      ip_pflege TEXT
+      ip_pflege TEXT,
+      section_audit_json TEXT DEFAULT '{}'
     )
   `);
 
@@ -229,7 +255,8 @@ async function init() {
       wann TEXT,
       beteiligte TEXT,
       zusammenfassung TEXT,
-      created_at TEXT NOT NULL
+      created_at TEXT NOT NULL,
+      ersteller TEXT DEFAULT ''
     )
   `);
 }
@@ -257,6 +284,10 @@ async function saveFallakteMerged(fallnr, patch) {
     merged.aust_notfallplan = Number(merged.aust_notfallplan) ? 1 : 0;
   }
 
+  if (merged.section_audit_json == null || merged.section_audit_json === "") {
+    merged.section_audit_json = "{}";
+  }
+
   await run(
     `INSERT OR REPLACE INTO fallakten (
       fallnr, updated_at,
@@ -269,9 +300,10 @@ async function saveFallakteMerged(fallnr, patch) {
       ziele_wuenschen, ziele_aenderung, wohn_situation, sozial_situation, sozial_bezug, sozial_stellen,
       erf_stationaer, erf_ambulant, erf_netz,
       ip_situation_zusammenfassung, ip_priorisierung_json,
-      ip_gemeinsam_verstaendnis, ip_ressourcen, ip_bedarf, ip_pflege
+      ip_gemeinsam_verstaendnis, ip_ressourcen, ip_bedarf, ip_pflege,
+      section_audit_json
     ) VALUES (
-      ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+      ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
     )`,
     [
       merged.fallnr,
@@ -317,6 +349,7 @@ async function saveFallakteMerged(fallnr, patch) {
       merged.ip_ressourcen,
       merged.ip_bedarf,
       merged.ip_pflege,
+      merged.section_audit_json,
     ]
   );
 }
@@ -373,12 +406,23 @@ function patchFromSection(section, body) {
 
 async function saveFallakteSection(fallnr, section, body) {
   const patch = patchFromSection(section, body);
+  const base = (await getFallakte(fallnr)) || emptyFallakte(fallnr);
+  let audit = {};
+  try {
+    audit = JSON.parse(base.section_audit_json || "{}");
+  } catch (e) {
+    audit = {};
+  }
+  const by = str(body, "user");
+  audit[section] = { by: by || "—", at: new Date().toISOString() };
+  patch.section_audit_json = JSON.stringify(audit);
   await saveFallakteMerged(fallnr, patch);
 }
 
 function listByFallnr(fallnr) {
   return all(
-    `SELECT id, fallnr, ersteller, datum, thema, ziel, massnahme, bis_wann, evaluation, status
+    `SELECT id, fallnr, ersteller, datum, thema, ziel, massnahme, bis_wann, evaluation, status,
+            letzte_aenderung_von, letzte_aenderung_am
      FROM planungen
      WHERE fallnr = ?
      ORDER BY datetime(datum) DESC, id DESC`,
@@ -388,29 +432,33 @@ function listByFallnr(fallnr) {
 
 function create({ fallnr, ersteller, thema, ziel, massnahme, bis_wann, evaluation }) {
   const datum = new Date().toISOString();
+  const von = String(ersteller || "");
   return run(
-    `INSERT INTO planungen (fallnr, ersteller, datum, thema, ziel, massnahme, bis_wann, evaluation, status)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'Offen')`,
+    `INSERT INTO planungen (fallnr, ersteller, datum, thema, ziel, massnahme, bis_wann, evaluation, status, letzte_aenderung_von, letzte_aenderung_am)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'Offen', ?, ?)`,
     [
       String(fallnr),
-      String(ersteller || ""),
+      von,
       datum,
       String(thema || ""),
       String(ziel),
       String(massnahme),
       String(bis_wann || ""),
       String(evaluation || ""),
+      von,
+      datum,
     ]
   );
 }
 
-function updateStatus({ id, fallnr, status }) {
+function updateStatus({ id, fallnr, status, bearbeiter }) {
   if (!STATUS_VALUES.includes(status)) {
     return Promise.reject(new Error("Ungültiger Status"));
   }
+  const t = new Date().toISOString();
   return run(
-    `UPDATE planungen SET status = ? WHERE id = ? AND fallnr = ?`,
-    [status, Number(id), String(fallnr)]
+    `UPDATE planungen SET status = ?, letzte_aenderung_von = ?, letzte_aenderung_am = ? WHERE id = ? AND fallnr = ?`,
+    [status, String(bearbeiter || ""), t, Number(id), String(fallnr)]
   );
 }
 
@@ -423,17 +471,24 @@ function deleteRow({ id, fallnr }) {
 
 function listSystemgespraeche(fallnr) {
   return all(
-    `SELECT id, fallnr, ziele_thema, wann, beteiligte, zusammenfassung, created_at
+    `SELECT id, fallnr, ziele_thema, wann, beteiligte, zusammenfassung, created_at, ersteller
      FROM systemgespraeche WHERE fallnr = ? ORDER BY id DESC`,
     [String(fallnr)]
   );
 }
 
-function createSystemgespraech({ fallnr, ziele_thema, wann, beteiligte, zusammenfassung }) {
+function createSystemgespraech({
+  fallnr,
+  ziele_thema,
+  wann,
+  beteiligte,
+  zusammenfassung,
+  ersteller,
+}) {
   const created_at = new Date().toISOString();
   return run(
-    `INSERT INTO systemgespraeche (fallnr, ziele_thema, wann, beteiligte, zusammenfassung, created_at)
-     VALUES (?, ?, ?, ?, ?, ?)`,
+    `INSERT INTO systemgespraeche (fallnr, ziele_thema, wann, beteiligte, zusammenfassung, created_at, ersteller)
+     VALUES (?, ?, ?, ?, ?, ?, ?)`,
     [
       String(fallnr),
       String(ziele_thema || ""),
@@ -441,6 +496,7 @@ function createSystemgespraech({ fallnr, ziele_thema, wann, beteiligte, zusammen
       String(beteiligte || ""),
       String(zusammenfassung || ""),
       created_at,
+      String(ersteller || ""),
     ]
   );
 }

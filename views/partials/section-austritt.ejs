@@ -1,8 +1,11 @@
-<section class="form-section mb-8 rounded-xl border border-slate-200 bg-white shadow-sm">
+<section id="sec-austritt" class="form-section scroll-mt-24 rounded-xl border border-slate-200 bg-white shadow-sm">
   <div class="border-b border-slate-100 bg-slate-50 px-4 py-3">
     <h2 class="text-base font-semibold text-klinik-blue">Austrittsplanung</h2>
+    <% if (typeof sectionAudit !== 'undefined' && sectionAudit && sectionAudit.austritt) { %>
+    <p class="mt-2 text-xs text-slate-500">Zuletzt gespeichert: <strong class="text-slate-700"><%= sectionAudit.austritt.by %></strong> · <%= formatDatum(sectionAudit.austritt.at) %></p>
+    <% } %>
   </div>
-  <form method="post" action="/plan/fallakte" class="p-4 sm:p-5">
+  <form method="post" action="<%= basePath %>/plan/fallakte" class="p-4 sm:p-5">
     <input type="hidden" name="fallnr" value="<%= fallnr %>" />
     <input type="hidden" name="user" value="<%= userRaw %>" />
     <input type="hidden" name="section" value="austritt" />
