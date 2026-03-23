@@ -40,6 +40,18 @@ Falls das Panel einen **Build-Befehl** erwartet, muss `npm run build` existieren
 
 `sqlite3` ist ein natives Modul; wenn **npm install** auf dem Server scheitert, mit dem Support klären, ob native Addons erlaubt sind.
 
+### 503 Service Unavailable
+
+Die Seite lädt, aber **503** heißt meist: die Node-App **läuft nicht** oder **stürzt beim Start ab**.
+
+1. **Hostinger → Node-App → Logs** öffnen: Steht dort ein Fehler (z. B. `sqlite3`, `EADDRINUSE`, `Cannot find module`)?
+2. **Start-Befehl:** `npm start` (führt `node server.js` aus).
+3. **Projekt-Root:** Ordner, in dem `package.json` und `server.js` liegen (bei dir das Repo-Root mit diesen Dateien).
+4. **Umgebungsvariablen:** `PORT` setzt Hostinger automatisch — nicht überschreiben. Optional: `BASE_PATH=/pkw-demo` (falls abweichend).
+5. **SQLite-Schreibzugriff:** Die App legt `data/planungen.db` an — falls der Prozess dort **nicht schreiben** darf, beim Start Absturz; Logs prüfen.
+
+Der Server bindet an **`0.0.0.0`** (alle Interfaces), damit Hostinger den Prozess erreicht.
+
 ## Projektstruktur
 
 | Datei / Ordner | Inhalt |

@@ -23,6 +23,7 @@ function normalizeBasePath(raw) {
 const BASE = normalizeBasePath(process.env.BASE_PATH);
 
 app.disable("x-powered-by");
+app.set("trust proxy", 1);
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 app.use(express.urlencoded({ extended: true }));
@@ -300,8 +301,11 @@ app.use(BASE || "/", router);
 
 async function main() {
   await db.init();
-  app.listen(port, () => {
-    console.log(`Klinik Wyss listening on port ${port} (base: ${BASE || "/"})`);
+  const host = process.env.HOST || "0.0.0.0";
+  app.listen(port, host, () => {
+    console.log(
+      `Klinik Wyss listening on http://${host}:${port} (base: ${BASE || "/"})`
+    );
   });
 }
 
