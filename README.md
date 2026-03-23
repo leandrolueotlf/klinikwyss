@@ -32,10 +32,13 @@ Die SQLite-Datei liegt unter `data/planungen.db` (nicht im Repo; Ordner `data/` 
 ## Hostinger (GitHub)
 
 - **Install:** `npm install`
+- **Build:** `npm run build` (legt `data/` an; kein Frontend-Bundle)
 - **Start:** `npm start`
 - **Node:** ≥ 18
 
-`sqlite3` ist ein natives Modul; auf dem Hostinger-Node-Stack sollte die Installation über `npm install` funktionieren. Falls der Build fehlschlägt, mit dem Support klären, ob native Addons erlaubt sind.
+Falls das Panel einen **Build-Befehl** erwartet, muss `npm run build` existieren — sonst schlägt der Deploy mit „Missing script: build“ fehl.
+
+`sqlite3` ist ein natives Modul; wenn **npm install** auf dem Server scheitert, mit dem Support klären, ob native Addons erlaubt sind.
 
 ## Projektstruktur
 
