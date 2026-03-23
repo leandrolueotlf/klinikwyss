@@ -18,31 +18,31 @@
     <div class="grid gap-6 md:grid-cols-2">
       <div class="space-y-4">
         <h3 class="text-sm font-semibold text-slate-800">Einbezug Angehörige</h3>
-        <%- include('field-input-segmented', { name: 'aust_angehoerige_welche', label: 'Welche', placeholder: '' }) %>
-        <%- include('field-input-segmented', { name: 'aust_angehoerige_kontakt', label: 'Kontaktaufnahme durch wen', placeholder: '' }) %>
+        <%- include('field-rich-text', { name: 'aust_angehoerige_welche', label: 'Welche', placeholder: '' }) %>
+        <%- include('field-rich-text', { name: 'aust_angehoerige_kontakt', label: 'Kontaktaufnahme durch wen', placeholder: '' }) %>
         <h3 class="pt-2 text-sm font-semibold text-slate-800">Einbezug / Vernetzung ext. Stellen</h3>
-        <%- include('field-textarea-segmented', { name: 'aust_externe_stellen', label: 'IV, Sozialdienst, Case Management, …', rows: 5 }) %>
+        <%- include('field-rich-text', { name: 'aust_externe_stellen', label: 'IV, Sozialdienst, Case Management, …', rows: 5 }) %>
         <h3 class="pt-2 text-sm font-semibold text-slate-800">Nachsorgender Therapeut*in</h3>
-        <%- include('field-input-segmented', { name: 'aust_nachsorg_wer', label: 'Wer / Profession', placeholder: '' }) %>
-        <%- include('field-input-segmented', { name: 'aust_nachsorg_ersttermin', label: 'Ersttermin wann', placeholder: '' }) %>
+        <%- include('field-rich-text', { name: 'aust_nachsorg_wer', label: 'Wer / Profession', placeholder: '' }) %>
+        <%- include('field-rich-text', { name: 'aust_nachsorg_ersttermin', label: 'Ersttermin wann', placeholder: '' }) %>
       </div>
       <div class="space-y-4">
         <h3 class="text-sm font-semibold text-slate-800">Weitere Unterstützung</h3>
-        <%- include('field-textarea-segmented', { name: 'aust_weitere_unterstuetzung', label: 'Was / Wer', rows: 3 }) %>
+        <%- include('field-rich-text', { name: 'aust_weitere_unterstuetzung', label: 'Was / Wer', rows: 3 }) %>
         <div class="flex items-center gap-2 pt-1">
           <input id="aust_notfallplan" name="aust_notfallplan" type="checkbox" value="1" class="h-4 w-4 rounded border-slate-300 text-klinik-blue focus:ring-klinik-blue" <%= Number(akten.aust_notfallplan) === 1 ? 'checked' : '' %> />
           <label for="aust_notfallplan" class="text-sm text-slate-800">Notfallplan erarbeiten</label>
         </div>
         <h3 class="pt-2 text-sm font-semibold text-slate-800">Themen für amb. Therapie nach Austritt</h3>
         <div class="space-y-2">
-          <%- include('field-input-segmented', { name: 'aust_amb_thema1', label: '1.', placeholder: '1.' }) %>
-          <%- include('field-input-segmented', { name: 'aust_amb_thema2', label: '2.', placeholder: '2.' }) %>
-          <%- include('field-input-segmented', { name: 'aust_amb_thema3', label: '3.', placeholder: '3.' }) %>
+          <%- include('field-rich-text', { name: 'aust_amb_thema1', label: '1.', variant: 'input' }) %>
+          <%- include('field-rich-text', { name: 'aust_amb_thema2', label: '2.', variant: 'input' }) %>
+          <%- include('field-rich-text', { name: 'aust_amb_thema3', label: '3.', variant: 'input' }) %>
         </div>
-        <%- include('field-input-segmented', { name: 'aust_spezielles', label: 'Spezielles / Besonderheiten / Bemerkungen', placeholder: '' }) %>
+        <%- include('field-rich-text', { name: 'aust_spezielles', label: 'Spezielles / Besonderheiten / Bemerkungen', placeholder: '' }) %>
         <h3 class="pt-2 text-sm font-semibold text-slate-800">Psychiatrie-Spitex</h3>
-        <%- include('field-input-segmented', { name: 'aust_spitex_wer', label: 'Wer', placeholder: '' }) %>
-        <%- include('field-input-segmented', { name: 'aust_spitex_ersttermin', label: 'Ersttermin wann', placeholder: '' }) %>
+        <%- include('field-rich-text', { name: 'aust_spitex_wer', label: 'Wer', placeholder: '' }) %>
+        <%- include('field-rich-text', { name: 'aust_spitex_ersttermin', label: 'Ersttermin wann', placeholder: '' }) %>
       </div>
     </div>
     <div class="mt-6 flex justify-end border-t border-slate-100 pt-4">

@@ -1,0 +1,25 @@
+<% var _name = typeof name !== 'undefined' ? name : ''; %>
+<% var _label = typeof label !== 'undefined' ? label : ''; %>
+<% var _rows = typeof rows !== 'undefined' ? rows : 2; %>
+<% var _variant = typeof variant !== 'undefined' ? variant : 'textarea'; %>
+<% var segs = typeof fieldSegments !== 'undefined' && fieldSegments && fieldSegments[_name] ? fieldSegments[_name] : []; %>
+<% var _by = (typeof userRaw !== 'undefined' && userRaw) ? userRaw : (typeof userLabel !== 'undefined' ? userLabel : '—'); %>
+<% var editorHtml = renderSegmentsEditorHtml(segs, role, _by); %>
+<% var _minH = _variant === 'input' ? '2.75' : String(Math.max(2.75, _rows * 1.35)); %>
+<div>
+  <label class="mb-1 block text-xs font-medium text-slate-600" for="rich-<%= _name %>"><%= _label %></label>
+  <div
+    id="rich-<%= _name %>"
+    class="rich-field <%= _variant === 'input' ? 'rich-field--input' : '' %>"
+    style="min-height: <%= _minH %>rem"
+    data-rich-field
+    data-name="<%= _name %>"
+    contenteditable="true"
+    spellcheck="true"
+    role="textbox"
+    aria-multiline="<%= _variant === 'input' ? 'false' : 'true' %>"
+    tabindex="0"
+  ><%- editorHtml %></div>
+  <input type="hidden" name="<%= _name %>" value="" autocomplete="off" />
+  <input type="hidden" name="<%= _name %>__segments" value="" autocomplete="off" />
+</div>

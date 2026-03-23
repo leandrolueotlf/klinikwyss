@@ -16,7 +16,7 @@
     <%- include('form-plan-context') %>
     <input type="hidden" name="section" value="interprof" />
     <div class="mb-6">
-      <%- include('field-textarea-segmented', { name: 'ip_situation_zusammenfassung', label: 'Zusammenfassung und Paraphrase der aktuellen Situation', rows: 4 }) %>
+      <%- include('field-rich-text', { name: 'ip_situation_zusammenfassung', label: 'Zusammenfassung und Paraphrase der aktuellen Situation', rows: 4 }) %>
     </div>
     <div class="mb-2 flex flex-wrap items-center justify-between gap-2">
       <p class="text-xs font-medium text-slate-700">Priorisierung (Not / Leidensdruck)</p>
@@ -62,10 +62,10 @@
       </table>
     </div>
     <div class="space-y-4">
-      <%- include('field-textarea-segmented', { name: 'ip_gemeinsam_verstaendnis', label: 'Gemeinsames Verständnis und Beurteilung der Probleme und Bedürfnisse', rows: 3 }) %>
-      <%- include('field-textarea-segmented', { name: 'ip_ressourcen', label: 'Ressourcen — was hat früher und bisher geholfen?', rows: 3 }) %>
-      <%- include('field-textarea-segmented', { name: 'ip_bedarf', label: 'Was brauchen Sie jetzt, um besser mit den Problemen umzugehen?', rows: 3 }) %>
-      <%- include('field-textarea-segmented', { name: 'ip_pflege', label: 'Was kann ich als Pflegeperson dazu beitragen?', rows: 3 }) %>
+      <%- include('field-rich-text', { name: 'ip_gemeinsam_verstaendnis', label: 'Gemeinsames Verständnis und Beurteilung der Probleme und Bedürfnisse', rows: 3 }) %>
+      <%- include('field-rich-text', { name: 'ip_ressourcen', label: 'Ressourcen — was hat früher und bisher geholfen?', rows: 3 }) %>
+      <%- include('field-rich-text', { name: 'ip_bedarf', label: 'Was brauchen Sie jetzt, um besser mit den Problemen umzugehen?', rows: 3 }) %>
+      <%- include('field-rich-text', { name: 'ip_pflege', label: 'Was kann ich als Pflegeperson dazu beitragen?', rows: 3 }) %>
     </div>
     <div class="mt-6 flex justify-end border-t border-slate-100 pt-4">
       <button type="submit" class="rounded-lg bg-klinik-blue px-5 py-2 text-sm font-semibold text-white shadow hover:bg-blue-900">Interprofessionelle Planung speichern</button>

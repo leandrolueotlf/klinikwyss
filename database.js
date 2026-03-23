@@ -6,6 +6,23 @@ const {
   normalizeRole,
 } = require("./lib/segmentMerge");
 
+function sanitizeSegmentItem(item) {
+  if (!item || typeof item !== "object") {
+    return {
+      t: "",
+      r: "unknown",
+      by: "",
+      at: new Date().toISOString(),
+    };
+  }
+  return {
+    t: String(item.t ?? ""),
+    r: normalizeRole(item.r),
+    by: String(item.by ?? ""),
+    at: String(item.at ?? new Date().toISOString()),
+  };
+}
+
 const dataDir = path.join(__dirname, "data");
 const dbPath = process.env.DB_PATH || path.join(dataDir, "planungen.db");
 
@@ -478,6 +495,22 @@ async function saveFallakteSection(fallnr, section, body) {
     if (SKIP_FIELD_SEGMENTS.has(key)) continue;
     const patchVal = patch[key];
     if (typeof patchVal === "number") continue;
+
+    const segJson = str(body, `${key}__segments`);
+    if (segJson) {
+      try {
+        const parsed = JSON.parse(segJson);
+        if (Array.isArray(parsed)) {
+          const cleaned = parsed.map(sanitizeSegmentItem);
+          segMap[key] = cleaned;
+          patch[key] = cleaned.map((s) => s.t).join("\n");
+          continue;
+        }
+      } catch (e) {
+        /* Fallback: Zeilen-Merge */
+      }
+    }
+
     const oldV = base[key] != null ? String(base[key]) : "";
     const newV = patchVal != null ? String(patchVal) : "";
     if (oldV === newV) continue;

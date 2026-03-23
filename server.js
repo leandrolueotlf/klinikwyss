@@ -120,6 +120,31 @@ function renderSegmentsHtml(segments) {
 app.locals.renderSegmentsHtml = renderSegmentsHtml;
 app.locals.escapeHtml = escapeHtml;
 
+/** HTML für contenteditable: farbige Spans, ein Feld wie Word (mehrere Autor*innen) */
+function renderSegmentsEditorHtml(segments, defaultRole, defaultBy) {
+  const ts = new Date().toISOString();
+  const r0 = normalizeRole(defaultRole);
+  const byEsc = escapeHtml(String(defaultBy || "—"));
+  const tsEsc = escapeHtml(ts);
+  if (!segments || !segments.length) {
+    return `<span class="seg seg-${r0}" data-by="${byEsc}" data-at="${tsEsc}">\u200b</span>`;
+  }
+  return segments
+    .map((s) => {
+      const r = normalizeRole(s.r);
+      const byS = escapeHtml(String(s.by || ""));
+      const atS = escapeHtml(String(s.at || ""));
+      const label = ROLE_LABELS[r] || ROLE_LABELS.unknown;
+      const tit = escapeHtml(`${label} · ${s.by || "—"} · ${formatDatum(s.at)}`);
+      const txt = escapeHtml(String(s.t || "")).replace(/\n/g, "<br/>");
+      const inner = txt || "\u200b";
+      return `<span class="seg seg-${r}" data-by="${byS}" data-at="${atS}" title="${tit}">${inner}</span>`;
+    })
+    .join("");
+}
+
+app.locals.renderSegmentsEditorHtml = renderSegmentsEditorHtml;
+
 /**
  * Immer gleiche URL-Form: fallnr, user (INES-Name), role — damit Links teilbar sind
  * und im Browser sichtbar ist, wer mit welcher Rolle arbeitet.

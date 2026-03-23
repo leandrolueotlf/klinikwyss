@@ -1,5 +1,10 @@
         </div>
       </div>
     </div>
+    <script>
+      window.PLAN_ROLE = <%- JSON.stringify(typeof role !== 'undefined' ? role : 'pflege') %>;
+      window.PLAN_USER = <%- JSON.stringify(typeof userRaw !== 'undefined' ? userRaw : '') %>;
+    </script>
+    <script src="<%= basePath %>/rich-field.js" defer></script>
   </body>
 </html>

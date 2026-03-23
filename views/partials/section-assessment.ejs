@@ -30,30 +30,30 @@
           ['psy_besonderheiten', 'Besonderheiten (Haustierbetreuung, Kinderbetreuung während PKW usw.)'],
         ]; %>
         <% psy.forEach(function ([fname, flabel]) { %>
-        <%- include('field-textarea-segmented', { name: fname, label: flabel, rows: 2 }) %>
+        <%- include('field-rich-text', { name: fname, label: flabel, rows: 2 }) %>
         <% }); %>
         <h3 class="pt-4 text-sm font-semibold text-klinik-blue">Arbeitssituation</h3>
-        <%- include('field-textarea-segmented', { name: 'arbeit_beruf', label: 'Angaben zum beruflichen Alltag', rows: 2 }) %>
-        <%- include('field-textarea-segmented', { name: 'arbeit_grad', label: 'Beschäftigungsgrad und Arbeitgeber', rows: 2 }) %>
+        <%- include('field-rich-text', { name: 'arbeit_beruf', label: 'Angaben zum beruflichen Alltag', rows: 2 }) %>
+        <%- include('field-rich-text', { name: 'arbeit_grad', label: 'Beschäftigungsgrad und Arbeitgeber', rows: 2 }) %>
         <h3 class="pt-4 text-sm font-semibold text-klinik-blue">Finanzielle Situation</h3>
-        <%- include('field-textarea-segmented', { name: 'finanz_situation', label: 'Aktuelle finanzielle Situation', rows: 2 }) %>
-        <%- include('field-textarea-segmented', { name: 'finanz_schulden', label: 'Schulden und Schuldenberatung', rows: 2 }) %>
-        <%- include('field-textarea-segmented', { name: 'finanz_sozialhilfe', label: 'Sozialhilfe, Ergänzungsleistungen usw.', rows: 2 }) %>
+        <%- include('field-rich-text', { name: 'finanz_situation', label: 'Aktuelle finanzielle Situation', rows: 2 }) %>
+        <%- include('field-rich-text', { name: 'finanz_schulden', label: 'Schulden und Schuldenberatung', rows: 2 }) %>
+        <%- include('field-rich-text', { name: 'finanz_sozialhilfe', label: 'Sozialhilfe, Ergänzungsleistungen usw.', rows: 2 }) %>
       </div>
       <div class="space-y-4">
         <h3 class="text-sm font-semibold text-klinik-blue">Ziele</h3>
-        <%- include('field-textarea-segmented', { name: 'ziele_wuenschen', label: 'Was wünschen Sie sich?', rows: 2 }) %>
-        <%- include('field-textarea-segmented', { name: 'ziele_aenderung', label: 'Was soll sich ändern?', rows: 2 }) %>
+        <%- include('field-rich-text', { name: 'ziele_wuenschen', label: 'Was wünschen Sie sich?', rows: 2 }) %>
+        <%- include('field-rich-text', { name: 'ziele_aenderung', label: 'Was soll sich ändern?', rows: 2 }) %>
         <h3 class="pt-4 text-sm font-semibold text-klinik-blue">Wohnsituation</h3>
-        <%- include('field-textarea-segmented', { name: 'wohn_situation', label: 'Aktuelle Wohnsituation', rows: 2 }) %>
+        <%- include('field-rich-text', { name: 'wohn_situation', label: 'Aktuelle Wohnsituation', rows: 2 }) %>
         <h3 class="pt-4 text-sm font-semibold text-klinik-blue">Soziale Situation</h3>
-        <%- include('field-textarea-segmented', { name: 'sozial_situation', label: 'Partnerschaft, Kinder inkl. Alter', rows: 2 }) %>
-        <%- include('field-textarea-segmented', { name: 'sozial_bezug', label: 'Wichtige Bezugspersonen', rows: 2 }) %>
-        <%- include('field-textarea-segmented', { name: 'sozial_stellen', label: 'Involvierte Stellen (KESB, IV, Sozialdienst, …)', rows: 2 }) %>
+        <%- include('field-rich-text', { name: 'sozial_situation', label: 'Partnerschaft, Kinder inkl. Alter', rows: 2 }) %>
+        <%- include('field-rich-text', { name: 'sozial_bezug', label: 'Wichtige Bezugspersonen', rows: 2 }) %>
+        <%- include('field-rich-text', { name: 'sozial_stellen', label: 'Involvierte Stellen (KESB, IV, Sozialdienst, …)', rows: 2 }) %>
         <h3 class="pt-4 text-sm font-semibold text-klinik-blue">Erfahrung stationär und ambulant</h3>
-        <%- include('field-textarea-segmented', { name: 'erf_stationaer', label: 'Stationäre / teilstationäre Aufenthalte', rows: 2 }) %>
-        <%- include('field-textarea-segmented', { name: 'erf_ambulant', label: 'Ambulante Behandlungen', rows: 2 }) %>
-        <%- include('field-textarea-segmented', { name: 'erf_netz', label: 'Ambulantes Netz (Kontaktdaten)', rows: 3 }) %>
+        <%- include('field-rich-text', { name: 'erf_stationaer', label: 'Stationäre / teilstationäre Aufenthalte', rows: 2 }) %>
+        <%- include('field-rich-text', { name: 'erf_ambulant', label: 'Ambulante Behandlungen', rows: 2 }) %>
+        <%- include('field-rich-text', { name: 'erf_netz', label: 'Ambulantes Netz (Kontaktdaten)', rows: 3 }) %>
       </div>
     </div>
     <div class="mt-6 flex justify-end border-t border-slate-100 pt-4">
